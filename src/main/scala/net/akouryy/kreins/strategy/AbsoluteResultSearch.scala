@@ -7,6 +7,8 @@ import scala.collection.mutable
 
 class AbsoluteResultSearch(initialBoard: Board) {
   private[this] val WIN_MIN: Short = 10000
+  private[this] val evalMemo =
+    mutable.HashMap[Board, Short]()
 
   def run = eval(initialBoard)
 
@@ -24,7 +26,7 @@ class AbsoluteResultSearch(initialBoard: Board) {
     }
   }
 
-  def eval(b: Board): Short = {
+  def eval(b: Board): Short = evalMemo.getOrElseUpdate(b, {
     val p = b.possPlaceable
     if(p.code == 0) {
       val c = b.pass
@@ -71,5 +73,5 @@ class AbsoluteResultSearch(initialBoard: Board) {
 
       bestScore
     }
-  }
+  })
 }
