@@ -12,7 +12,7 @@ import util.BitUtil
 
 import scala.collection.mutable
 
-class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
+final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
 
   import CheckmateSearch._
 
@@ -21,7 +21,7 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
   private[this] val evalMemo =
     mutable.HashMap[Board, Int]()
 
-  private[this] val startTime = System.nanoTime
+  private[this] val startTimeMS = System.currentTimeMillis
 
   var nNodes = 0
 
@@ -36,7 +36,6 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
     while(root.nProof != 0 && root.nDisproof != 0 && resourcesAvailable()) {
       val bestProver = pickBestProver(curr)
       expandNode(bestProver)
-      //println(bestProver.board, bestProver.children.length)
       curr = updateAncestors(bestProver, root)
     }
     if(root.state == Proven || root.nProof == 0) {
@@ -52,17 +51,11 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
     val b = n.board
 
     n.state =
-      if(b.isEnd) {
-        // n.isExpanded = false
-        if(b.countBlack > b.countWhite) {
-          if(n.isOr) Proven else Disproven
-        } else if(b.countBlack < b.countWhite) {
-          if(n.isOr) Disproven else Proven
-        } else {
-          if(isDrawOK) Proven else Disproven
-        }
-      } else {
-        Unknown
+      b.result1 match {
+        case Board.FstWin => if(n.isOr) Proven else Disproven
+        case Board.SndWin => if(n.isOr) Disproven else Proven
+        case Board.Draw => if(isDrawOK) Proven else Disproven
+        case Board.NotEnd => Unknown
       }
   }
 
@@ -121,9 +114,10 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
         }
       }
       if(bestNode.board.countEmpty == 64) {
-        System.err.println(s"[CheckmateSearch#pickBestProver] " +
-          s"Unreachable: empty bestNode\n$n")
         nNodes += 1
+        throw UnexpectedException(
+          s"[CheckmateSearch#pickBestProver] empty bestNode\n$n"
+        )
       }
       n = bestNode
     }
@@ -143,23 +137,22 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
     n.isExpanded = true
   }
 
-  def getChildren(n: Node): Array[Node] = {
+  def getChildren(n: Node) = {
     var pp = n.board.possPlaceable.code
     if(pp == 0) {
       // pass
       nNodes += 1
-      return Array(Node(n.board.pass, Some(n), !n.isOr))
+      List(Node(n.board.pass, Some(n), !n.isOr))
+    } else {
+      var children = List[Node]()
+      while(pp != 0) {
+        val i = BitUtil.firstHighBitPos(pp)
+        children ::= Node(n.board.place(i), Some(n), !n.isOr)
+        nNodes += 1
+        pp &= ~(1L << i)
+      }
+      children
     }
-
-    val children =
-      mutable.ArrayBuilder.make[Node]
-    while(pp != 0) {
-      val i = BitUtil.firstHighBitPos(pp)
-      children += Node(n.board.place(i, n.board.possToFlip(i)), Some(n), !n.isOr)
-      nNodes += 1
-      pp &= ~(1L << i)
-    }
-    children.result
   }
 
   def updateAncestors(_node: Node, root: Node): Node = {
@@ -171,22 +164,22 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
       if(n.nProof == np && n.nDisproof == nd) {
         return n
       }
-      n.parent match {
-        case Some(p) => n = p
-        case None =>
-          System.err.println(s"[CheckmateSearch#updateAncestors] Unreachable: no parent\n$n")
-          return n
-      }
+      n = n.parent.getOrElse(throw UnexpectedException(
+        s"[CheckmateSearch#updateAncestors] no parent\n$n"
+      ))
     }
     updateNums(root)
     root
   }
 
-  def resourcesAvailable() = System.nanoTime - startTime < 500000000L /* 500ms */
-
+  def resourcesAvailable() = System.currentTimeMillis - startTimeMS < 500
 }
 
 object CheckmateSearch {
+
+  case class UnexpectedException(msg: String = null, cause: Throwable = null)
+    extends RuntimeException(msg, cause)
+
 
   sealed trait ProofState {
     def unary_~ : ProofState

@@ -3,18 +3,50 @@ package model
 
 import util.BitUtil
 
-final case class Board(fst: Panel, snd: Panel) {
-  def pass = Board(snd, fst)
+final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) {
 
-  def countBlack = BitUtil.popcount(fst.code)
+  import Board._
 
-  def countWhite = BitUtil.popcount(snd.code)
+  lazy val pass = if(_pass != null) _pass else Board(snd, fst, this)
 
-  def countEmpty = BitUtil.popcount(~(fst | snd).code)
+  lazy val countFst = BitUtil.popcount(fst.code)
 
-  def isEnd =
+  lazy val countSnd = BitUtil.popcount(snd.code)
+
+  lazy val countEmpty = BitUtil.popcount(~(fst | snd).code)
+
+  lazy val isEnd =
     countEmpty == 0 ||
       possPlaceable.code == 0 && pass.possPlaceable.code == 0
+
+  def result =
+    if(isEnd) {
+      if(countFst > countSnd) FstWin
+      else if(countFst == countSnd) Draw
+      else SndWin
+    } else {
+      NotEnd
+    }
+
+  def isEnd1 =
+    countEmpty == 1 ||
+      possPlaceable.code == 0 && pass.possPlaceable.code == 0
+
+  def result1 =
+    if(isEnd) {
+      result
+    } else if(countEmpty == 1) {
+      if(possPlaceable.code != 0) {
+        ~place(BitUtil.firstHighBitPos(possPlaceable.code)).result
+      } else if(pass.possPlaceable.code != 0) {
+        pass.place(BitUtil.firstHighBitPos(pass.possPlaceable.code)).result
+      } else {
+        // must not reach here
+        result
+      }
+    } else {
+      NotEnd
+    }
 
   @inline def &(c: Long) = Board(fst & c, snd & c)
 
@@ -60,7 +92,7 @@ final case class Board(fst: Panel, snd: Panel) {
   /**
     * https://primenumber.hatenadiary.jp/entry/2016/12/26/063226
     */
-  @inline def possPlaceable = {
+  lazy val possPlaceable = {
     val a = rotate45ACW
     val c = rotate45CW
     possPlaceableToLeftOrRight |
@@ -81,17 +113,17 @@ final case class Board(fst: Panel, snd: Panel) {
     * https://primenumber.hatenadiary.jp/entry/2016/12/26/063226
     * http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
     *
-    * @param pos 石が置かれた座標 (0 to 63)
+    * @param stone 石が置かれた座標 (0 to 63)
     */
-  def possToFlip(pos: Int) = {
+  def possToFlip(stone: Int) = {
     val omx = snd.code
     val omYZW = snd.code & 0x7e7e7e7e7e7e7e7eL
     var f = 0L;
     {
-      val maskX = 0x0080808080808080L >>> 63 - pos
-      val maskY = 0x7F00000000000000L >>> 63 - pos
-      val maskZ = 0x0102040810204000L >>> 63 - pos
-      val maskW = 0x0040201008040201L >>> 63 - pos
+      val maskX = 0x0080808080808080L >>> 63 - stone
+      val maskY = 0x7F00000000000000L >>> 63 - stone
+      val maskZ = 0x0102040810204000L >>> 63 - stone
+      val maskW = 0x0040201008040201L >>> 63 - stone
       val ofX = fst.code & BitUtil.firstHighBit(maskX & ~omx)
       val ofY = fst.code & BitUtil.firstHighBit(maskY & ~omYZW)
       val ofZ = fst.code & BitUtil.firstHighBit(maskZ & ~omYZW)
@@ -102,10 +134,10 @@ final case class Board(fst: Panel, snd: Panel) {
       f |= (-ofW << 1) & maskW
     }
     {
-      val maskX = 0x0101010101010100L << pos
-      val maskY = 0x00000000000000feL << pos
-      val maskZ = 0x0002040810204080L << pos
-      val maskW = 0x8040201008040200L << pos
+      val maskX = 0x0101010101010100L << stone
+      val maskY = 0x00000000000000feL << stone
+      val maskZ = 0x0002040810204080L << stone
+      val maskW = 0x8040201008040200L << stone
       val ofX = maskX & ((omx | ~maskX) + 1) & fst.code
       val ofY = maskY & ((omYZW | ~maskY) + 1) & fst.code
       val ofZ = maskZ & ((omYZW | ~maskZ) + 1) & fst.code
@@ -120,6 +152,8 @@ final case class Board(fst: Panel, snd: Panel) {
 
   def place(stone: Int, flipped: Panel) =
     Board(snd & ~flipped.code, fst | flipped | (1L << stone))
+
+  def place(stone: Int): Board = place(stone, possToFlip(stone))
 
   override def toString = {
     val fm = fst.toMatrix
@@ -152,4 +186,25 @@ object Board {
       Panel(s.reverseMap(c => if(c == 'O') 1L else 0L).reduce(_ << 1 | _)),
       Panel(s.reverseMap(c => if(c == 'X') 1L else 0L).reduce(_ << 1 | _))
     )
+
+  sealed trait BoardResult {
+    def unary_~ : BoardResult
+  }
+
+  case object FstWin extends BoardResult {
+    val unary_~ = SndWin
+  }
+
+  case object SndWin extends BoardResult {
+    val unary_~ = FstWin
+  }
+
+  case object Draw extends BoardResult {
+    val unary_~ = Draw
+  }
+
+  case object NotEnd extends BoardResult {
+    val unary_~ = NotEnd
+  }
+
 }
