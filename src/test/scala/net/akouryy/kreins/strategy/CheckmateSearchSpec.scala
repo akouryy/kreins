@@ -25,18 +25,18 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
     var i = 0
     var maxNodes = 0
     var sumNodes = 0
-    for((b, s) <- scores) {
-      val ars = new CheckmateSearch(b, false)
+    for((b, s) <- scores; isDrawOK <- Seq(false, true)) {
+      val ars = new CheckmateSearch(b, isDrawOK)
       val t0 = System.nanoTime()
       val run = ars.run
       val t1 = System.nanoTime()
-      assert(Integer.signum(run) === (if(s == 1) 1 else -1))
-      i += 1
+      assert(Integer.signum(run) === (if(s == 1 || isDrawOK && s == 0) 1 else -1))
       sumNodes += ars.nNodes
       maxNodes = Math.max(maxNodes, ars.nNodes)
-      println(f"$i%3s ${b.countEmpty}%2s ${ars.nNodes}%8s : ${
+      println(f"${i / 2}%3s ${b.countEmpty}%2s ${ars.nNodes}%8s : ${
         java.text.NumberFormat.getIntegerInstance.format(t1 - t0)
       }%14sns")
+      i += 1
     }
     println(s"max: $maxNodes, sum: $sumNodes")
   }

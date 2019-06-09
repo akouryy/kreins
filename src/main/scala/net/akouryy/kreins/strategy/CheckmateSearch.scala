@@ -182,7 +182,7 @@ class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
     root
   }
 
-  def resourcesAvailable() = System.nanoTime - startTime < 10000000000L /* 10000ms */
+  def resourcesAvailable() = System.nanoTime - startTime < 500000000L /* 500ms */
 
 }
 
