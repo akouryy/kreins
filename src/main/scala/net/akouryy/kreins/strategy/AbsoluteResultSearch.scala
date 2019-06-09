@@ -10,6 +10,8 @@ class AbsoluteResultSearch(initialBoard: Board) {
   private[this] val evalMemo =
     mutable.HashMap[Board, Short]()
 
+  var nNodes = 0
+
   def run = eval(initialBoard)
 
   def evalEndGame(b: Board) = {
@@ -27,6 +29,8 @@ class AbsoluteResultSearch(initialBoard: Board) {
   }
 
   def eval(b: Board): Short = evalMemo.getOrElseUpdate(b, {
+    nNodes += 1
+
     val p = b.possPlaceable
     if(p.code == 0) {
       val c = b.pass
@@ -66,8 +70,13 @@ class AbsoluteResultSearch(initialBoard: Board) {
       poss.sortBy(_._1).foreach { case (_, q, c) =>
         if(q.code == 0) {
           // 相手パス
-          bestScore = Math.max(bestScore, eval(c.pass)).toShort
+          val s = Math.max(bestScore, eval(c.pass)).toShort
+          if(s >= WIN_MIN) {
+            return s
+          }
+          bestScore = s
         } else {
+          nNodes += 1
           var worstScore = Short.MaxValue
           // for(i <- 0 to 63) if((q.code >> i & 1) == 1) {
           var qc = q.code

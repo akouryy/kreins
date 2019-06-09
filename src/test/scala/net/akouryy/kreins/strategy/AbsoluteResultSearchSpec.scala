@@ -23,10 +23,21 @@ class AbsoluteResultSearchSpec extends FlatSpec with DiagrammedAssertions {
 
   "eval" should "勝ちなら正の値、負けなら負の値、引き分けなら0を返す" in {
     var i = 0
+    var maxNodes = 0
+    var sumNodes = 0
     for((b, s) <- scores) {
-      assert(Integer.signum(new AbsoluteResultSearch(b).run) === s)
+      val ars = new AbsoluteResultSearch(b)
+      val t0 = System.nanoTime()
+      val run = ars.run
+      val t1 = System.nanoTime()
+      assert(Integer.signum(run) === s)
       i += 1
-      println(s"$i ${b.countEmpty}")
+      sumNodes += ars.nNodes
+      maxNodes = Math.max(maxNodes, ars.nNodes)
+      println(f"$i%3s ${b.countEmpty}%2s ${ars.nNodes}%8s : ${
+        java.text.NumberFormat.getIntegerInstance.format(t1 - t0)
+      }%14sns")
     }
+    println(s"max: $maxNodes, sum: $sumNodes")
   }
 }
