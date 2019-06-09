@@ -57,24 +57,4 @@ package net.akouryy.kreins.util
     val c = b >>> 16 & ROWS_2367 | (b & ROWS_2367) << 16
     c >>> 32 | c << 32
   }
-
-  /**
-    * https://web.archive.org/web/20180823080354/https://chessprogramming.wikispaces.com/Flipping+Mirroring+and+Rotating
-    */
-  @inline def rotate45ACW(a: Long) = {
-    val b = a ^ COLS_0246 & (a ^ rotateRight(a, 8))
-    val c = b ^ COLS_0145 & (b ^ rotateRight(b, 16))
-    val d = c ^ COLS_0123 & (c ^ rotateRight(c, 32))
-    d
-  }
-
-  /**
-    * https://web.archive.org/web/20180823080354/https://chessprogramming.wikispaces.com/Flipping+Mirroring+and+Rotating
-    */
-  @inline def rotate45CW(a: Long) = {
-    val b = a ^ COLS_1357 & (a ^ rotateRight(a, 8))
-    val c = b ^ COLS_2367 & (b ^ rotateRight(b, 16))
-    val d = c ^ COLS_4567 & (c ^ rotateRight(c, 32))
-    d
-  }
 }
