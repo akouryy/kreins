@@ -12,6 +12,10 @@ final case class Board(fst: Panel, snd: Panel) {
 
   def countEmpty = BitUtil.popcount(~(fst | snd).code)
 
+  def isEnd =
+    countEmpty == 0 ||
+      possPlaceable.code == 0 && pass.possPlaceable.code == 0
+
   @inline def &(c: Long) = Board(fst & c, snd & c)
 
   @inline def |(c: Long) = Board(fst | c, snd | c)

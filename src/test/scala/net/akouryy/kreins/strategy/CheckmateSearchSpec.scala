@@ -4,7 +4,7 @@ package strategy
 import org.scalatest._
 import model.Board
 
-class AbsoluteResultSearchSpec extends FlatSpec with DiagrammedAssertions {
+class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
   val scores =
     util.Loan(scala.io.Source.fromFile(
       "src/test/scala/net/akouryy/kreins/strategy/endgame.scr1"
@@ -26,11 +26,11 @@ class AbsoluteResultSearchSpec extends FlatSpec with DiagrammedAssertions {
     var maxNodes = 0
     var sumNodes = 0
     for((b, s) <- scores) {
-      val ars = new AbsoluteResultSearch(b)
+      val ars = new CheckmateSearch(b, false)
       val t0 = System.nanoTime()
       val run = ars.run
       val t1 = System.nanoTime()
-      assert(Integer.signum(run) === s)
+      assert(Integer.signum(run) === (if(s == 1) 1 else -1))
       i += 1
       sumNodes += ars.nNodes
       maxNodes = Math.max(maxNodes, ars.nNodes)
