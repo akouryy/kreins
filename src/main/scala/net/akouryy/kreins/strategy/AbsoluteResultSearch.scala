@@ -1,8 +1,8 @@
 package net.akouryy.kreins
 package strategy
 
-import model.Board
-import model.Panel
+import model.{Board, Panel}
+import util.BitUtil
 import scala.collection.mutable
 
 class AbsoluteResultSearch(initialBoard: Board) {
@@ -38,7 +38,11 @@ class AbsoluteResultSearch(initialBoard: Board) {
       } else {
         // 自分はパス
         var worstScore = Short.MaxValue
-        for(i <- 0 to 63) if((q.code >> i & 1) == 1) {
+        // for(i <- 0 to 63) if((q.code >> i & 1) == 1) {
+        var qc = q.code
+        while(qc != 0) {
+          val i = BitUtil.firstHighBitPos(qc)
+          qc &= ~(1L << i)
           worstScore = Math.min(worstScore, eval(c.place(i, c.possToFlip(i)))).toShort
         }
         worstScore
@@ -47,10 +51,14 @@ class AbsoluteResultSearch(initialBoard: Board) {
       val poss =
         mutable.ArrayBuffer[(Int, Panel, Board)]()
 
-      for(i <- 0 to 63) if((p.code >> i & 1) == 1) {
+      // for(i <- 0 to 63) if((p.code >> i & 1) == 1) {
+      var pc = p.code
+      while(pc != 0) {
+        val i = BitUtil.firstHighBitPos(pc)
+        pc &= ~(1L << i)
         val c = b.place(i, b.possToFlip(i))
-        val p = c.possPlaceable
-        poss += ((p.popcount, p, c))
+        val pp = c.possPlaceable
+        poss += ((pp.popcount, pp, c))
       }
 
       var bestScore = Short.MinValue
@@ -61,7 +69,11 @@ class AbsoluteResultSearch(initialBoard: Board) {
           bestScore = Math.max(bestScore, eval(c.pass)).toShort
         } else {
           var worstScore = Short.MaxValue
-          for(i <- 0 to 63) if((q.code >> i & 1) == 1) {
+          // for(i <- 0 to 63) if((q.code >> i & 1) == 1) {
+          var qc = q.code
+          while(qc != 0) {
+            val i = BitUtil.firstHighBitPos(qc)
+            qc &= ~(1L << i)
             worstScore = Math.min(worstScore, eval(c.place(i, c.possToFlip(i)))).toShort
           }
           if(worstScore >= WIN_MIN) {

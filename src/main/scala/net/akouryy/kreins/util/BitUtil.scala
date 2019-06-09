@@ -38,6 +38,35 @@ package net.akouryy.kreins.util
     swapBytes(e & -e)
   }
 
+  @inline def firstHighBitPos(a: Long) = {
+    val b = a | a >>> 1
+    val c = b | b >>> 2
+    val d = c | c >>> 4
+    val e = d | d >>> 8
+    val f = e | e >>> 16
+    val g = f | f >>> 32
+    popcount(g) - 1
+  }
+
+  /**
+    * https://qiita.com/kazatsuyu/items/38203287c19890a2b7c6
+    */
+  private[this] val LHBPMagic = 0x03f0a933adcbd8d1L
+  private[this] val LHBPTable = Array(
+    64, 0, -1, 1, -1, 12, -1, 2, 60, -1, 13, -1, -1, 53, -1, 3,
+    61, -1, -1, 21, -1, 14, -1, 42, -1, 24, 54, -1, -1, 28, -1, 4,
+    62, -1, 58, -1, 19, -1, 22, -1, -1, 17, 15, -1, -1, 33, -1, 43,
+    -1, 50, -1, 25, 55, -1, -1, 35, -1, 38, 29, -1, -1, 45, -1, 5,
+    63, -1, 11, -1, 59, -1, 52, -1, -1, 20, -1, 41, 23, -1, 27, -1,
+    -1, 57, 18, -1, 16, -1, 32, -1, 49, -1, -1, 34, 37, -1, 44, -1,
+    -1, 10, -1, 51, -1, 40, -1, 26, 56, -1, -1, 31, 48, -1, 36, -1,
+    9, -1, 39, -1, -1, 30, 47, -1, 8, -1, -1, 46, 7, -1, 6
+  )
+
+  @inline def lastHighBitPos(a: Long) = {
+    LHBPTable((LHBPMagic * (a & -a) >>> 57).toInt)
+  }
+
   /**
     * (https://primenumber.hatenadiary.jp/entry/2016/12/03/203823)
     * https://web.archive.org/web/20180823080354/https://chessprogramming.wikispaces.com/Flipping+Mirroring+and+Rotating
