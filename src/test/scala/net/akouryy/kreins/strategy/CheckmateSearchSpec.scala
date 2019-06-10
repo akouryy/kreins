@@ -2,7 +2,7 @@ package net.akouryy.kreins
 package strategy
 
 import org.scalatest._
-import model.Board
+import game.Board
 
 class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
   val scores =
@@ -31,9 +31,16 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
     for((b, s) <- scores; isDrawOK <- Seq(false, true)) {
       val ars = new CheckmateSearch(b, isDrawOK)
       val t0 = System.nanoTime()
-      val run = ars.run
+      val result = {
+        import CheckmateSearch._
+        ars.run match {
+          case WillWin(_) | WillWinPass => true
+          case WillLose => false
+          case Timeout => throw new RuntimeException("timeout")
+        }
+      }
       val t1 = System.nanoTime()
-      assert(Integer.signum(run) === (if(s == 1 || isDrawOK && s == 0) 1 else -1))
+      assert(result === (s == 1 || isDrawOK && s == 0))
       sumNodes += ars.nNodes
       maxNodes = Math.max(maxNodes, ars.nNodes)
       sumTime += t1 - t0
@@ -42,8 +49,11 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
         java.text.NumberFormat.getIntegerInstance.format(t1 - t0)
       }%14sns"
       i += 1
+      if(i >= 113) {
+        println(ss.mkString("\n"))
+        ss = List()
+      }
     }
-    println(ss.mkString("\n"))
     println(s"nodes max: $maxNodes; sum: $sumNodes\ntime max: ${
       java.text.NumberFormat.getIntegerInstance.format(maxTime)
     }ns; sum: ${

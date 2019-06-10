@@ -1,5 +1,5 @@
 package net.akouryy.kreins
-package model
+package game
 
 import util.BitUtil
 
@@ -150,10 +150,10 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     Panel(f)
   }
 
-  def place(stone: Int, flipped: Panel) =
+  def place(stone: Int): Board = {
+    val flipped = possToFlip(stone)
     Board(snd & ~flipped.code, fst | flipped | (1L << stone))
-
-  def place(stone: Int): Board = place(stone, possToFlip(stone))
+  }
 
   override def toString = {
     val fm = fst.toMatrix

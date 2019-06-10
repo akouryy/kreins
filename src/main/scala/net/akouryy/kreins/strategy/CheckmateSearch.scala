@@ -7,28 +7,22 @@
 package net.akouryy.kreins
 package strategy
 
-import model.{Board, Panel}
+import game.{Board, Panel}
 import util.BitUtil
-
-import scala.collection.mutable
 
 final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
 
   import CheckmateSearch._
 
-  private[this] val MAX = 1000000000
-  private[this] val MIN = -1000000000
-  private[this] val evalMemo =
-    mutable.HashMap[Board, Int]()
+  private[this] val MAX = 100000000
+  private[this] val MIN = -100000000
 
   private[this] val startTimeMS = System.currentTimeMillis
 
   var nNodes = 0
 
-  def run = eval(initialBoard)
-
-  def eval(b: Board) = {
-    val root = Node(b, None, isOr = true)
+  def run: RunResult = {
+    val root = Node(initialBoard, None, isOr = true)
     nNodes += 1
     checkCheckmate(root)
     updateNums(root)
@@ -39,11 +33,24 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
       curr = updateAncestors(bestProver, root)
     }
     if(root.state == Proven || root.nProof == 0) {
-      MAX
+      for(c <- root.children) if(c.state == Proven || c.nProof == 0) {
+        var pp = root.board.possPlaceable.code
+        if(pp == 0) {
+          return WillWinPass
+        }
+        while(pp != 0) {
+          val i = BitUtil.firstHighBitPos(pp)
+          if(c.board == root.board.place(i))
+            return WillWin(i)
+          pp &= ~(1L << i)
+        }
+        throw UnexpectedException(s"[eval] no placement for children\n$c")
+      }
+      WillWinPass
     } else if(root.state == Disproven || root.nDisproof == 0) {
-      MIN
+      WillLose
     } else {
-      0
+      Timeout
     }
   }
 
@@ -115,9 +122,7 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
       }
       if(bestNode.board.countEmpty == 64) {
         nNodes += 1
-        throw UnexpectedException(
-          s"[CheckmateSearch#pickBestProver] empty bestNode\n$n"
-        )
+        throw UnexpectedException(s"[pickBestProver] empty bestNode\n$n")
       }
       n = bestNode
     }
@@ -165,7 +170,7 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
         return n
       }
       n = n.parent.getOrElse(throw UnexpectedException(
-        s"[CheckmateSearch#updateAncestors] no parent\n$n"
+        s"[updateAncestors] no parent\n$n"
       ))
     }
     updateNums(root)
@@ -180,6 +185,15 @@ object CheckmateSearch {
   case class UnexpectedException(msg: String = null, cause: Throwable = null)
     extends RuntimeException(msg, cause)
 
+  sealed trait RunResult
+
+  final case class WillWin(stone: Int) extends RunResult
+
+  case object WillWinPass extends RunResult
+
+  case object WillLose extends RunResult
+
+  case object Timeout extends RunResult
 
   sealed trait ProofState {
     def unary_~ : ProofState

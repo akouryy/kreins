@@ -1,5 +1,5 @@
 package net.akouryy.kreins
-package model
+package game
 
 import util.BitUtil
 

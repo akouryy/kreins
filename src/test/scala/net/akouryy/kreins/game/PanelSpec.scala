@@ -1,4 +1,4 @@
-package net.akouryy.kreins.model
+package net.akouryy.kreins.game
 
 import org.scalatest._
 import net.akouryy.kreins.util.BitUtil
