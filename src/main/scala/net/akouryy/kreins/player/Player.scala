@@ -19,7 +19,8 @@ trait PlayerGenerator[P <: Player] {
 object Player {
   val generators = Seq(
     RandomPlayer.Generator,
-    RandomThenCheckmatePlayer.Generator
+    MinMaxPlayer.WithCellScore,
+    MinMaxPlayer.WithKindaiScore
   )
 
   def randomThink(b: Board) = {
