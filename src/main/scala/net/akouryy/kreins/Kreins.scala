@@ -22,9 +22,9 @@ object Kreins extends App {
   ))
   val bob = bobGen.fromStdin()
 
-  val nGames = InputUtil.readIntWithRetry("Game count [0-]: ", _ >= 0)
   val allowResign =
     InputUtil.readInt("Allow resign [0-1](1): ").forall(_ == 1)
+  val nGames = InputUtil.readIntWithRetry("Game count [0-]: ", _ >= 0)
 
   if(nGames == 0) {
     val g = Game(alice, bob)

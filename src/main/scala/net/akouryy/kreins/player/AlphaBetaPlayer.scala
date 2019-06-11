@@ -29,8 +29,8 @@ object AlphaBetaPlayer {
 
   object WithCellScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
-      print("full search depth: ")
-      new AlphaBetaPlayer(scorer.CellScorer, StdIn.readInt())
+      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
+      new AlphaBetaPlayer(scorer.CellScorer, depth)
     }
 
     val nickname = "AlphaBetaPlayer/CellScore"
@@ -39,7 +39,7 @@ object AlphaBetaPlayer {
   object WithKindaiScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       val scr = scorer.KindaiScorer.fromStdin()
-      val depth = InputUtil.readInt("full search depth[3]: ").getOrElse(3)
+      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
       new AlphaBetaPlayer(scr, depth)
     }
 
@@ -49,7 +49,7 @@ object AlphaBetaPlayer {
   object WithPatternScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       val scr = scorer.PatternScorer.fromStdin()
-      val depth = InputUtil.readInt("full search depth[3]: ").getOrElse(3)
+      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
       new AlphaBetaPlayer(scr, depth)
     }
 

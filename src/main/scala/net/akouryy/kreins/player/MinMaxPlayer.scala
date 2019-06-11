@@ -29,8 +29,8 @@ object MinMaxPlayer {
 
   object WithCellScore extends PlayerGenerator[MinMaxPlayer] {
     def fromStdin() = {
-      print("full search depth: ")
-      new MinMaxPlayer(scorer.CellScorer, StdIn.readInt())
+      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
+      new MinMaxPlayer(scorer.CellScorer, depth)
     }
 
     val nickname = "MinMaxPlayer/CellScore"
@@ -39,7 +39,7 @@ object MinMaxPlayer {
   object WithKindaiScore extends PlayerGenerator[MinMaxPlayer] {
     def fromStdin() = {
       val scr = scorer.KindaiScorer.fromStdin()
-      val depth = InputUtil.readInt("full search depth[3]: ").getOrElse(3)
+      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
       new MinMaxPlayer(scr, depth)
     }
 
