@@ -1,44 +1,48 @@
 package net.akouryy.kreins
 
 import game.Game
+import net.akouryy.kreins.util.InputUtil
 import player.Player
 
 object Kreins extends App {
-  def readInt() = scala.io.StdIn.readInt()
-
   val pgs = Player.generators
 
   println(s"players: ${
     pgs.zipWithIndex.map { case (pg, i) => s"$i: ${pg.nickname}" }.mkString(", ")
   }")
-  print(s"Alice [0-${pgs.length - 1}]: ")
-  val aliceGen = pgs(readInt())
+  val aliceGen = pgs(InputUtil.readIntWithRetry(
+    s"Alice [0-${pgs.length - 1}]: ",
+    pgs.indices.contains
+  ))
   val alice = aliceGen.fromStdin()
-  print(s"Bob [0-${pgs.length - 1}]: ")
-  val bobGen = pgs(readInt())
-  val bob = bobGen.fromStdin()
-  print(s"Game count: ")
-  val nGames = readInt()
 
-  if(nGames <= 0) {
+  val bobGen = pgs(InputUtil.readIntWithRetry(
+    s"Bob [0-${pgs.length - 1}]: ",
+    pgs.indices.contains
+  ))
+  val bob = bobGen.fromStdin()
+
+  val nGames = InputUtil.readIntWithRetry("Game count [0-]: ", _ >= 0)
+
+  if(nGames == 0) {
     val g = Game(alice, bob)
-    g.run()
+    g.run(false)
     println(s"${g.blackBoard.result}\n${g.blackBoard}")
   } else {
-    print(s"Show statistics for every 2n games. n: ")
-    val nShow = readInt()
+    val nShow = InputUtil.readIntWithRetry("Show statistics for every 2n games. n: ")
 
     var afWin, asWin, bfWin, bsWin, draw = 0
     for(t <- 0 until nGames) {
       import game.Board._
       val aliceFirst = t % 2 == 0
       val g = if(aliceFirst) Game(alice, bob) else Game(bob, alice)
-      g.run()
-      g.blackBoard.result match {
-        case FstWin => if(aliceFirst) afWin += 1 else bfWin += 1
-        case SndWin => if(aliceFirst) bsWin += 1 else asWin += 1
-        case Draw => draw += 1
-        case NotEnd => throw new RuntimeException(s"game not end\n${g.blackBoard}")
+      g.run(true)
+      (g.blackBoard.result, g.resignedBy) match {
+        case (FstWin(_), _) | (_, Some(false)) => if(aliceFirst) afWin += 1 else bfWin += 1
+        case (SndWin(_), _) | (_, Some(true)) => if(aliceFirst) bsWin += 1 else asWin += 1
+        case (Draw, _) => draw += 1
+        case (NotEnd, _) =>
+          throw new RuntimeException(s"game not end\n${g.blackBoard}")
       }
 
       if((t / 2) % nShow == nShow - 1) {

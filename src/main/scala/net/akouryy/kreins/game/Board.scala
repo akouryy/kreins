@@ -19,20 +19,21 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     countEmpty == 0 ||
       possPlaceable.code == 0 && pass.possPlaceable.code == 0
 
-  def result =
+  @inline def result =
     if(isEnd) {
-      if(countFst > countSnd) FstWin
-      else if(countFst == countSnd) Draw
-      else SndWin
+      val diff = countFst - countSnd
+      if(diff > 0) FstWin(diff)
+      else if(diff == 0) Draw
+      else SndWin(-diff)
     } else {
       NotEnd
     }
 
-  def isEnd1 =
+  @inline def isEnd1 =
     countEmpty == 1 ||
       possPlaceable.code == 0 && pass.possPlaceable.code == 0
 
-  def result1 =
+  @inline def result1 =
     if(isEnd) {
       result
     } else if(countEmpty == 1) {
@@ -52,21 +53,21 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
 
   @inline def |(c: Long) = Board(fst | c, snd | c)
 
-  def mirrorWithDiagRightDown =
+  @inline def mirrorWithDiagRightDown =
     Board(fst.mirrorWithDiagRightDown, snd.mirrorWithDiagRightDown)
 
-  def mirrorWithDiagRightUp =
+  @inline def mirrorWithDiagRightUp =
     Board(fst.mirrorWithDiagRightUp, snd.mirrorWithDiagRightUp)
 
-  def mirrorWithHorizontal =
+  @inline def mirrorWithHorizontal =
     Board(fst.mirrorWithHorizontal, snd.mirrorWithHorizontal)
 
-  def mirrorWithVertical =
+  @inline def mirrorWithVertical =
     Board(fst.mirrorWithVertical, snd.mirrorWithVertical)
 
-  def rotate45ACW = Board(fst.rotate45ACW, snd.rotate45ACW)
+  @inline def rotate45ACW = Board(fst.rotate45ACW, snd.rotate45ACW)
 
-  def rotate45CW = Board(fst.rotate45CW, snd.rotate45CW)
+  @inline def rotate45CW = Board(fst.rotate45CW, snd.rotate45CW)
 
   /**
     * https://primenumber.hatenadiary.jp/entry/2016/12/26/063226
@@ -92,7 +93,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
   /**
     * https://primenumber.hatenadiary.jp/entry/2016/12/26/063226
     */
-  lazy val possPlaceable = {
+  @inline lazy val possPlaceable = {
     val a = rotate45ACW
     val c = rotate45CW
     possPlaceableToLeftOrRight |
@@ -115,7 +116,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     *
     * @param stone 石が置かれた座標 (0 to 63)
     */
-  def possToFlip(stone: Int) = {
+  @inline def possToFlip(stone: Int) = {
     val omx = snd.code
     val omYZW = snd.code & 0x7e7e7e7e7e7e7e7eL
     var f = 0L;
@@ -150,7 +151,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     Panel(f)
   }
 
-  def place(stone: Int): Board = {
+  @inline def place(stone: Int): Board = {
     val flipped = possToFlip(stone)
     Board(snd & ~flipped.code, fst | flipped | (1L << stone))
   }
@@ -172,7 +173,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
 }
 
 object Board {
-  val initialBoard = Board(
+  val InitialBoard = Board(
     Panel(0x0000000810000000L),
     Panel(0x0000001008000000L)
   )
@@ -191,12 +192,12 @@ object Board {
     def unary_~ : BoardResult
   }
 
-  case object FstWin extends BoardResult {
-    val unary_~ = SndWin
+  final case class FstWin(diff: Int) extends BoardResult {
+    def unary_~ = SndWin(diff)
   }
 
-  case object SndWin extends BoardResult {
-    val unary_~ = FstWin
+  final case class SndWin(diff: Int) extends BoardResult {
+    def unary_~ = FstWin(diff)
   }
 
   case object Draw extends BoardResult {

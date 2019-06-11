@@ -7,7 +7,7 @@ import game.Board
 import util.BitUtil
 
 object RandomPlayer extends Player {
-  def think(b: Board) = Player.randomThink(b)
+  def think(b: Board, resign: Boolean) = Player.randomThink(b)
 
   object Generator extends PlayerGenerator[RandomPlayer.type] {
     def fromStdin() = RandomPlayer

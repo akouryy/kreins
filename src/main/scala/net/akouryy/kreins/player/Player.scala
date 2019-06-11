@@ -7,7 +7,7 @@ import game.Board
 import util.BitUtil
 
 trait Player {
-  def think(b: Board): Int
+  def think(b: Board, resign: Boolean): Int
 }
 
 trait PlayerGenerator[P <: Player] {
@@ -20,7 +20,9 @@ object Player {
   val generators = Seq(
     RandomPlayer.Generator,
     MinMaxPlayer.WithCellScore,
-    MinMaxPlayer.WithKindaiScore
+    MinMaxPlayer.WithKindaiScore,
+    AlphaBetaPlayer.WithCellScore,
+    AlphaBetaPlayer.WithKindaiScore
   )
 
   def randomThink(b: Board) = {

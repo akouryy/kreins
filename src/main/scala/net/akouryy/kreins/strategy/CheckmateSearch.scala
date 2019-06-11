@@ -10,7 +10,7 @@ package strategy
 import game.{Board, Panel}
 import util.BitUtil
 
-final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
+final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean, maxTimeMS: Int) {
 
   import CheckmateSearch._
 
@@ -59,8 +59,8 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
 
     n.state =
       b.result1 match {
-        case Board.FstWin => if(n.isOr) Proven else Disproven
-        case Board.SndWin => if(n.isOr) Disproven else Proven
+        case Board.FstWin(_) => if(n.isOr) Proven else Disproven
+        case Board.SndWin(_) => if(n.isOr) Disproven else Proven
         case Board.Draw => if(isDrawOK) Proven else Disproven
         case Board.NotEnd => Unknown
       }
@@ -177,7 +177,7 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean) {
     root
   }
 
-  def resourcesAvailable() = System.currentTimeMillis - startTimeMS < 500
+  def resourcesAvailable() = System.currentTimeMillis - startTimeMS < maxTimeMS
 }
 
 object CheckmateSearch {

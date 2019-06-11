@@ -2,13 +2,22 @@ package net.akouryy.kreins.util
 
 //noinspection SpellCheckingInspection
 @inline object BitUtil {
-  val COLS_0123 = 0xf0f0f0f0f0f0f0f0L
-  val COLS_0145 = 0xccccccccccccccccL
-  val COLS_0246 = 0xaaaaaaaaaaaaaaaaL
-  val COLS_1357 = 0x5555555555555555L
-  val COLS_2367 = 0x3333333333333333L
-  val COLS_4567 = 0x0f0f0f0f0f0f0f0fL
-  val COLS_7 = 0x0101010101010101L
+  val COLS_a0 = 0x0101010101010101L
+  val COLS_a01 = 0x0303030303030303L
+  val COLS_a0123 = 0x0f0f0f0f0f0f0f0fL
+  val COLS_a0145 = 0x3333333333333333L
+  val COLS_a0246 = 0x5555555555555555L
+  val COLS_a1357 = 0xaaaaaaaaaaaaaaaaL
+  val COLS_a2367 = 0xccccccccccccccccL
+  val COLS_a4567 = 0xf0f0f0f0f0f0f0f0L
+  val COLS_a67 = 0xc0c0c0c0c0c0c0c0L
+  val COLS_a7 = 0x8080808080808080L
+  val ROWS_a0 = 0x00000000000000ffL
+  val ROWS_a01 = 0x000000000000ffffL
+  val ROWS_a0123 = 0x00000000ffffffffL
+  val ROWS_a4567 = 0xffffffff00000000L
+  val ROWS_a67 = 0xffff000000000000L
+  val ROWS_a7 = 0xff00000000000000L
   val ROT45ACW_MASK = 0xfefcf8f0e0c08000L
   val ROT45CW_MASK = 0x80c0e0f0f8fcfeffL
   val ROWS_0246 = 0xff00ff00ff00ff00L
@@ -21,10 +30,10 @@ package net.akouryy.kreins.util
     * https://en.wikipedia.org/wiki/Hamming_weight popcount64c
     */
   @inline def popcount(a: Long) = {
-    val b = a - (a >>> 1 & COLS_1357)
-    val c = (b >>> 2 & COLS_2367) + (b & COLS_2367)
-    val d = (c >>> 4) + c & COLS_4567
-    (d * COLS_7 >>> 56).toInt
+    val b = a - (a >>> 1 & COLS_a0246)
+    val c = (b >>> 2 & COLS_a0145) + (b & COLS_a0145)
+    val d = (c >>> 4) + c & COLS_a0123
+    (d * COLS_a0 >>> 56).toInt
   }
 
   /**
@@ -72,9 +81,9 @@ package net.akouryy.kreins.util
     * https://web.archive.org/web/20180823080354/https://chessprogramming.wikispaces.com/Flipping+Mirroring+and+Rotating
     */
   @inline def swapBitsInEachByte(a: Long) = {
-    val b = a >>> 1 & COLS_1357 | (a & COLS_1357) << 1
-    val c = b >>> 2 & COLS_2367 | (b & COLS_2367) << 2
-    c >>> 4 & COLS_4567 | (c & COLS_4567) << 4
+    val b = a >>> 1 & COLS_a0246 | (a & COLS_a0246) << 1
+    val c = b >>> 2 & COLS_a0145 | (b & COLS_a0145) << 2
+    c >>> 4 & COLS_a0123 | (c & COLS_a0123) << 4
   }
 
   /**

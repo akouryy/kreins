@@ -5,10 +5,10 @@ import scala.io.StdIn
 import game.Board
 import net.akouryy.kreins.util.InputUtil
 import scorer.Scorer
-import strategy.{CheckmateSearch, MinMaxSearch}
+import strategy.{CheckmateSearch, AlphaBetaSearch}
 
-class MinMaxPlayer(val scorer: Scorer, val depth: Int) extends Player {
-  val fss = new MinMaxSearch(scorer, depth)
+class AlphaBetaPlayer(val scorer: Scorer, val depth: Int) extends Player {
+  val fss = new AlphaBetaSearch(scorer, depth)
 
   def think(b: Board, resign: Boolean) = {
     import CheckmateSearch._
@@ -25,25 +25,25 @@ class MinMaxPlayer(val scorer: Scorer, val depth: Int) extends Player {
   }
 }
 
-object MinMaxPlayer {
+object AlphaBetaPlayer {
 
-  object WithCellScore extends PlayerGenerator[MinMaxPlayer] {
+  object WithCellScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       print("full search depth: ")
-      new MinMaxPlayer(scorer.CellScorer, StdIn.readInt())
+      new AlphaBetaPlayer(scorer.CellScorer, StdIn.readInt())
     }
 
-    val nickname = "MinMaxPlayer/CellScore"
+    val nickname = "AlphaBetaPlayer/CellScore"
   }
 
-  object WithKindaiScore extends PlayerGenerator[MinMaxPlayer] {
+  object WithKindaiScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       val scr = scorer.KindaiScorer.fromStdin()
       val depth = InputUtil.readInt("full search depth[3]: ").getOrElse(3)
-      new MinMaxPlayer(scr, depth)
+      new AlphaBetaPlayer(scr, depth)
     }
 
-    val nickname = "MinMaxPlayer/KindaiScore"
+    val nickname = "AlphaBetaPlayer/KindaiScore"
   }
 
 }
