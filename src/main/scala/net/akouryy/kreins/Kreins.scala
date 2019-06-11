@@ -7,8 +7,8 @@ import player.Player
 object Kreins extends App {
   val pgs = Player.generators
 
-  println(s"players: ${
-    pgs.zipWithIndex.map { case (pg, i) => s"$i: ${pg.nickname}" }.mkString(", ")
+  println(s"players:\n${
+    pgs.zipWithIndex.map { case (pg, i) => s"  $i: ${pg.nickname}" }.mkString("\n")
   }")
   val aliceGen = pgs(InputUtil.readIntWithRetry(
     s"Alice [0-${pgs.length - 1}]: ",
@@ -23,10 +23,12 @@ object Kreins extends App {
   val bob = bobGen.fromStdin()
 
   val nGames = InputUtil.readIntWithRetry("Game count [0-]: ", _ >= 0)
+  val allowResign =
+    InputUtil.readInt("Allow resign [0-1](1): ").forall(_ == 1)
 
   if(nGames == 0) {
     val g = Game(alice, bob)
-    g.run(false)
+    g.run(allowResign)
     println(s"${g.blackBoard.result}\n${g.blackBoard}")
   } else {
     val nShow = InputUtil.readIntWithRetry("Show statistics for every 2n games. n: ")
@@ -36,7 +38,7 @@ object Kreins extends App {
       import game.Board._
       val aliceFirst = t % 2 == 0
       val g = if(aliceFirst) Game(alice, bob) else Game(bob, alice)
-      g.run(true)
+      g.run(allowResign)
       (g.blackBoard.result, g.resignedBy) match {
         case (FstWin(_), _) | (_, Some(false)) => if(aliceFirst) afWin += 1 else bfWin += 1
         case (SndWin(_), _) | (_, Some(true)) => if(aliceFirst) bsWin += 1 else asWin += 1

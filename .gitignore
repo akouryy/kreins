@@ -1,4 +1,5 @@
 /.idea/
+/data/
 /project/target/
 /rawdata/
 /src/test/scala/net/akouryy/kreins/strategy/endgame.scr1

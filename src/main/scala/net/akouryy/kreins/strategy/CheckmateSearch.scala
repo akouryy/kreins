@@ -72,18 +72,18 @@ final class CheckmateSearch(initialBoard: Board, isDrawOK: Boolean, maxTimeMS: I
         n.nProof = MAX
         n.nDisproof = 0
         for(c <- n.children) {
-          n.nProof = Math.min(n.nProof, c.nProof)
+          n.nProof = n.nProof.min(c.nProof)
           n.nDisproof += c.nDisproof
         }
-        n.nDisproof = Math.min(n.nDisproof, MAX)
+        n.nDisproof = n.nDisproof.min(MAX)
       } else {
         n.nProof = 0
         n.nDisproof = MAX
         for(c <- n.children) {
           n.nProof += c.nProof
-          n.nDisproof = Math.min(n.nDisproof, c.nDisproof)
+          n.nDisproof = n.nDisproof.min(c.nDisproof)
         }
-        n.nProof = Math.min(n.nProof, MAX)
+        n.nProof = n.nProof.min(MAX)
       }
     } else {
       n.state match {

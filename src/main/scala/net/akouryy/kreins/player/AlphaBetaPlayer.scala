@@ -46,4 +46,14 @@ object AlphaBetaPlayer {
     val nickname = "AlphaBetaPlayer/KindaiScore"
   }
 
+  object WithPatternScore extends PlayerGenerator[AlphaBetaPlayer] {
+    def fromStdin() = {
+      val scr = scorer.PatternScorer.fromStdin()
+      val depth = InputUtil.readInt("full search depth[3]: ").getOrElse(3)
+      new AlphaBetaPlayer(scr, depth)
+    }
+
+    val nickname = "AlphaBetaPlayer/PatternScore"
+  }
+
 }

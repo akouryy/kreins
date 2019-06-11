@@ -10,7 +10,7 @@ trait Player {
   def think(b: Board, resign: Boolean): Int
 }
 
-trait PlayerGenerator[P <: Player] {
+trait PlayerGenerator[+P <: Player] {
   def fromStdin(): P
 
   val nickname: String
@@ -19,10 +19,12 @@ trait PlayerGenerator[P <: Player] {
 object Player {
   val generators = Seq(
     RandomPlayer.Generator,
+    CheckmateRandomPlayer.Generator,
     MinMaxPlayer.WithCellScore,
     MinMaxPlayer.WithKindaiScore,
     AlphaBetaPlayer.WithCellScore,
-    AlphaBetaPlayer.WithKindaiScore
+    AlphaBetaPlayer.WithKindaiScore,
+    AlphaBetaPlayer.WithPatternScore
   )
 
   def randomThink(b: Board) = {
