@@ -20,9 +20,10 @@ class Client(host: String, port: Int, name: String) {
     } { (s, w) =>
       def turn() = {
         val pos = player.think(board.get, resign = false)
-        if(pos == -1)
+        if(pos == -1) {
           w(Pass.messageString)
-        else {
+          board = Some(board.get.pass)
+        } else {
           w(Move(pos).messageString)
           board = Some(board.get.place(pos))
         }
@@ -49,6 +50,7 @@ class Client(host: String, port: Int, name: String) {
           turn()
           true
         case Ack(time) =>
+          println(board)
           true
       }
     }

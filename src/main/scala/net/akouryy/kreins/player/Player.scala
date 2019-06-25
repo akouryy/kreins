@@ -8,6 +8,8 @@ import util.BitUtil
 
 trait Player {
   def think(b: Board, resign: Boolean): Int
+
+  def reset(): Unit = {}
 }
 
 trait PlayerGenerator[+P <: Player] {

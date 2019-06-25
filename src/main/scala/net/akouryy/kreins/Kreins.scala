@@ -11,7 +11,7 @@ object Kreins {
   final case class CmdConfig(
     host: String = "localhost",
     port: Int = 8000,
-    playerName: String = "kreins　1"
+    playerName: String = "kreins　v0.1"
   )
 
   val cmdParser = {
@@ -95,6 +95,8 @@ object Kreins {
             if(aliceFirst) bsWin else bfWin
           }%5d, draw $draw")
         }
+        alice.reset()
+        bob.reset()
       }
 
       println(

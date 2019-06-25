@@ -160,13 +160,13 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     val fm = fst.toMatrix
     val sm = snd.toMatrix
 
-    s"Board(${fst.code}, ${snd.code}):\n+---------------+\n" +
-      (fm zip sm).map { case (fr, sr) =>
+    s"Board(${fst.code}, ${snd.code}):\n+1-2-3-4-5-6-7-8+\n" +
+      fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         "|" +
           (fr zip sr).map { case (f, s) =>
             if(f) if(s) '!' else 'X' else if(s) 'O' else ' '
           }.mkString(" ") +
-          "|"
+          "ABCDEFGH" (i)
       }.mkString("\n") +
       "\n+---------------+"
   }

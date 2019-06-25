@@ -10,7 +10,7 @@ import net.akouryy.kreins.util.{InputUtil, Loan}
 import scala.io.Source
 
 object GamStudyAction {
-  def main(args: Array[String]) {
+  def _main(args: Array[String]) {
     val gamFileName = InputUtil.readLineWithRetry("gam file name: ").trim
     val wgtFileName = InputUtil.readLineWithRetry("wgt file name: ").trim
 
