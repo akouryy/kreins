@@ -16,10 +16,7 @@ object Loan {
   }
 
   object Closer {
-    implicit val sourceCloser: Closer[io.Source] = _.close()
-
-    implicit val inputStreamCloser: Closer[InputStream] = _.close()
-    implicit val outputStreamCloser: Closer[OutputStream] = _.close()
+    implicit val closeCloser: Closer[ {def close(): Unit}] = _.close()
   }
 
 }

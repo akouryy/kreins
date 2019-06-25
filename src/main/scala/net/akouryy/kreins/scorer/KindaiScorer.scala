@@ -17,9 +17,9 @@ class KindaiScorer(val wbp: Int, val wcn: Int, val wfs: Int) extends Scorer {
 
 object KindaiScorer {
   def fromStdin() = {
-    val wbp = InputUtil.readInt("wbp[3]: ").getOrElse(3)
-    val wcn = InputUtil.readInt("wcn[13]: ").getOrElse(13)
-    val wfs = InputUtil.readInt("wfs[40]: ").getOrElse(40)
+    val wbp = InputUtil.readInt("wbp(3): ").getOrElse(3)
+    val wcn = InputUtil.readInt("wcn(13): ").getOrElse(13)
+    val wfs = InputUtil.readInt("wfs(40): ").getOrElse(40)
     new scorer.KindaiScorer(wbp, wcn, wfs)
   }
 }
