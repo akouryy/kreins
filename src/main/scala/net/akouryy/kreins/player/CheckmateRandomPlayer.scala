@@ -8,7 +8,7 @@ import scorer.Scorer
 import strategy.{CheckmateSearch, MinMaxSearch}
 
 object CheckmateRandomPlayer extends Player {
-  def think(b: Board, resign: Boolean) = {
+  def think(b: Board, resign: Boolean, time: Int) = {
     import CheckmateSearch._
     if(b.countEmpty <= 23) {
       new CheckmateSearch(b, false, 100).run match {

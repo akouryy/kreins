@@ -10,7 +10,7 @@ import strategy.{CheckmateSearch, MinMaxSearch}
 class MinMaxPlayer(val scorer: Scorer, val depth: Int) extends Player {
   val fss = new MinMaxSearch(scorer, depth)
 
-  def think(b: Board, resign: Boolean) = {
+  def think(b: Board, resign: Boolean, time: Int) = {
     import CheckmateSearch._
     if(b.countEmpty <= 23) {
       new CheckmateSearch(b, false, 100).run match {

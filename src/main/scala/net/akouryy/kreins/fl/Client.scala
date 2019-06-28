@@ -8,49 +8,62 @@ import scorer.KindaiScorer
 class Client(host: String, port: Int, name: String) {
   val conn = Connector(host, port)
 
+  sealed trait GameState
+
+  case object Waiting extends GameState
+
+  final case class Playing(board: Board, timeMS: Int) extends GameState
+
   def run() = {
     import Command._
 
     val player =
-      new AlphaBetaPlayer(new KindaiScorer(3, 13, 40), 5)
-    var board: Option[Board] = None
+      new AlphaBetaPlayer(new KindaiScorer(3, 13, 40), 6)
+
+    var state: GameState = Waiting
 
     conn.connect { w =>
       w(Open(name).messageString)
     } { (s, w) =>
       def turn() = {
-        val pos = player.think(board.get, resign = false)
+        val Playing(board, timeMS) = state
+
+        val pos = player.think(board, resign = false, timeMS)
         if(pos == -1) {
           w(Pass.messageString)
-          board = Some(board.get.pass)
+          state = Playing(board.pass, timeMS)
         } else {
           w(Move(pos).messageString)
-          board = Some(board.get.place(pos))
+          state = Playing(board.place(pos), timeMS)
         }
       }
 
-      if(s == null) sys.exit(0)
+      if(s == null) sys.exit(2)
 
       parse(s).forall {
-        case Start(isBlack, herName, time) =>
-          board = Some(Board.InitialBoard)
+        case Start(isBlack, herName, timeMS) =>
+          state = Playing(Board.InitialBoard, timeMS)
           if(isBlack) turn()
           true
         case End(result, myStone, herStone, reason) =>
-          board = None
+          state = Waiting
           true
         case Bye(scores) =>
           false
         case Move(pos) =>
-          board = Some(board.get.place(pos))
+          val Playing(board, timeMS) = state
+          state = Playing(board.place(pos), timeMS)
           turn()
           true
         case Pass =>
-          board = Some(board.get.pass)
+          val Playing(board, timeMS) = state
+          state = Playing(board.pass, timeMS)
           turn()
           true
-        case Ack(time) =>
-          println(board)
+        case Ack(timeMS) =>
+          println(state)
+          val Playing(board, _) = state
+          state = Playing(board, timeMS)
           true
       }
     }

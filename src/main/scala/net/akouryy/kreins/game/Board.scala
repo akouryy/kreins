@@ -166,7 +166,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
           (fr zip sr).map { case (f, s) =>
             if(f) if(s) '!' else 'X' else if(s) 'O' else ' '
           }.mkString(" ") +
-          "ABCDEFGH" (i)
+          "|" + "ABCDEFGH" (i)
       }.mkString("\n") +
       "\n+---------------+"
   }

@@ -7,7 +7,7 @@ import game.Board
 import util.BitUtil
 
 trait Player {
-  def think(b: Board, resign: Boolean): Int
+  def think(b: Board, resign: Boolean, timeMS: Int = 100000000): Int
 
   def reset(): Unit = {}
 }

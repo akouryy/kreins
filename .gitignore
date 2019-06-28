@@ -1,6 +1,7 @@
 /.idea/
 /data/
 /project/target/
+/project/project/target/
 /rawdata/
 /src/test/scala/net/akouryy/kreins/strategy/endgame.scr1
 /target/
