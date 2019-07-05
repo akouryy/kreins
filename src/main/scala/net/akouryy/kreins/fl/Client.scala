@@ -1,11 +1,15 @@
 package net.akouryy.kreins
 package fl
 
+import java.io.FileInputStream
+import java.util.zip.GZIPInputStream
+
 import game.Board
+import net.akouryy.kreins.encoder.PlacementTableEncoder
 import player.AlphaBetaPlayer
 import scorer.KindaiScorer
 
-class Client(host: String, port: Int, name: String) {
+class Client(host: String, port: Int, name: String, zysFile: String) {
   val conn = Connector(host, port)
 
   sealed trait GameState
@@ -17,8 +21,16 @@ class Client(host: String, port: Int, name: String) {
   def run() = {
     import Command._
 
+    val zys = PlacementTableEncoder.decode(
+      new GZIPInputStream(new FileInputStream(zysFile))
+    ).pt
+
     val player =
-      new AlphaBetaPlayer(new KindaiScorer(3, 13, 40), 6)
+      new AlphaBetaPlayer(
+        new KindaiScorer(3, 13, 40),
+        depth = 6,
+        zys
+      )
 
     var state: GameState = Waiting
 

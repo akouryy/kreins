@@ -11,7 +11,8 @@ object Kreins {
   final case class CmdConfig(
     host: String = "localhost",
     port: Int = 8000,
-    playerName: String = "kreins　v0.1.1"
+    playerName: String = "kreins　v0.1.1",
+    dysGzFile: String = ""
   )
 
   val cmdParser = {
@@ -28,7 +29,11 @@ object Kreins {
         .text("port number"),
       opt[String]('n', "name")
         .action((x, c) => c.copy(playerName = x))
-        .text("player name")
+        .text("player name"),
+      opt[String]('z', "dys")
+        .required
+        .action((x, c) => c.copy(dysGzFile = x))
+        .text(".dys.gz file name")
     )
   }
 
@@ -37,8 +42,8 @@ object Kreins {
       interactive()
     else {
       OParser.parse(cmdParser, args, CmdConfig()) match {
-        case Some(CmdConfig(host, port, name)) =>
-          new Client(host, port, name).run()
+        case Some(CmdConfig(host, port, name, dys)) =>
+          new Client(host, port, name, dys).run()
         case None => // exit
       }
     }

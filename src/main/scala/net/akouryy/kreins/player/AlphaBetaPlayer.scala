@@ -1,24 +1,36 @@
 package net.akouryy.kreins
 package player
 
+import java.io.FileInputStream
+import java.util.zip.GZIPInputStream
+
 import scala.io.StdIn
 import game.Board
+import net.akouryy.kreins.encoder.PlacementTableEncoder
 import net.akouryy.kreins.util.InputUtil
 import scorer.Scorer
-import strategy.{CheckmateSearch, AlphaBetaSearch}
+import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
 
-class AlphaBetaPlayer(val scorer: Scorer, val depth: Int) extends Player {
+class AlphaBetaPlayer(
+  val scorer: Scorer,
+  val depth: Int,
+  val dys: Map[Board, List[(Byte, Byte)]]
+) extends Player {
   var absolutelyWin = false
 
   var cmSearch = new CheckmateSearch(isDrawOK = false)
+
+  val dysSearch = new DyagsekiSearch(dys)
 
   override def reset() = {
     absolutelyWin = false
     cmSearch = new CheckmateSearch(isDrawOK = false)
   }
 
-  def think(board: Board, resign: Boolean, time: Int) = {
+  def think(board: Board, resign: Boolean, time: Int): Int = {
     import CheckmateSearch._
+
+    for(m <- dysSearch.bestMove(board)) return m
 
     val rest = board.countEmpty
 
@@ -56,7 +68,10 @@ object AlphaBetaPlayer {
   object WithCellScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
-      new AlphaBetaPlayer(scorer.CellScorer, depth)
+      val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
+      new AlphaBetaPlayer(scorer.CellScorer, depth, PlacementTableEncoder.decode(
+        new GZIPInputStream(new FileInputStream(dysFile))
+      ).pt)
     }
 
     val nickname = "AlphaBetaPlayer/CellScore"
@@ -66,13 +81,16 @@ object AlphaBetaPlayer {
     def fromStdin() = {
       val scr = scorer.KindaiScorer.fromStdin()
       val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
-      new AlphaBetaPlayer(scr, depth)
+      val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
+      new AlphaBetaPlayer(scr, depth, PlacementTableEncoder.decode(
+        new GZIPInputStream(new FileInputStream(dysFile))
+      ).pt)
     }
 
     val nickname = "AlphaBetaPlayer/KindaiScore"
   }
 
-  object WithPatternScore extends PlayerGenerator[AlphaBetaPlayer] {
+  /*object WithPatternScore extends PlayerGenerator[AlphaBetaPlayer] {
     def fromStdin() = {
       val scr = scorer.PatternScorer.fromStdin()
       val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
@@ -80,6 +98,6 @@ object AlphaBetaPlayer {
     }
 
     val nickname = "AlphaBetaPlayer/PatternScore"
-  }
+  }*/
 
 }

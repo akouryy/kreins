@@ -25,8 +25,7 @@ object Player {
     MinMaxPlayer.WithCellScore,
     MinMaxPlayer.WithKindaiScore,
     AlphaBetaPlayer.WithCellScore,
-    AlphaBetaPlayer.WithKindaiScore,
-    AlphaBetaPlayer.WithPatternScore
+    AlphaBetaPlayer.WithKindaiScore
   )
 
   def randomThink(b: Board) = {
