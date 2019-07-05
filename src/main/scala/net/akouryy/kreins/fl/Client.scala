@@ -47,6 +47,8 @@ class Client(host: String, port: Int, name: String) {
           true
         case End(result, myStone, herStone, reason) =>
           state = Waiting
+          player.reset()
+          System.gc()
           true
         case Bye(scores) =>
           false
@@ -61,9 +63,9 @@ class Client(host: String, port: Int, name: String) {
           turn()
           true
         case Ack(timeMS) =>
-          println(state)
           val Playing(board, _) = state
           state = Playing(board, timeMS)
+          println(state)
           true
       }
     }

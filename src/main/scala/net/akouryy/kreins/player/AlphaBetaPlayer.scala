@@ -10,8 +10,11 @@ import strategy.{CheckmateSearch, AlphaBetaSearch}
 class AlphaBetaPlayer(val scorer: Scorer, val depth: Int) extends Player {
   var absolutelyWin = false
 
+  var cmSearch = new CheckmateSearch(isDrawOK = false)
+
   override def reset() = {
     absolutelyWin = false
+    cmSearch = new CheckmateSearch(isDrawOK = false)
   }
 
   def think(board: Board, resign: Boolean, time: Int) = {
@@ -25,20 +28,20 @@ class AlphaBetaPlayer(val scorer: Scorer, val depth: Int) extends Player {
       else 6
     )
 
-    if(rest <= 40 || absolutelyWin) {
-      new CheckmateSearch(
+    if(rest <= 25 || absolutelyWin) {
+      cmSearch.run(
         board,
-        isDrawOK = false,
         maxTimeMS =
           if(rest <= 24 || absolutelyWin) (time / 2) max 50 min 500
           else if(rest <= 30) (time / 5) max 50 min 200
           else 50
-      ).run match {
+      ) match {
         case WillWin(stone) =>
-          println(s"absolutely win! $stone (in $rest)")
+          println(s"win!!! $stone (in $rest)")
           absolutelyWin = true
           stone
         case WillLose =>
+          println(s"lose!!! (in $rest)")
           if(resign) -1 else searcher.bestMove(board)
         case _ => searcher.bestMove(board)
       }
