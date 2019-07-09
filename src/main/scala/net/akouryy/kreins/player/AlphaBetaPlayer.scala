@@ -14,7 +14,7 @@ import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
 class AlphaBetaPlayer(
   val scorer: Scorer,
   val depth: Int,
-  val dys: Map[Board, List[(Byte, Byte)]]
+  val dys: Map[Board, List[(Byte, Int)]]
 ) extends Player {
   var absolutelyWin = false
 
@@ -37,7 +37,7 @@ class AlphaBetaPlayer(
     val searcher = new AlphaBetaSearch(scorer,
       if(time < 10000) 3
       else if(time < 30000 || rest >= 52) 5
-      else 6
+      else 7
     )
 
     if(rest <= 25 || absolutelyWin) {
@@ -71,7 +71,7 @@ object AlphaBetaPlayer {
       val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
       new AlphaBetaPlayer(scorer.CellScorer, depth, PlacementTableEncoder.decode(
         new GZIPInputStream(new FileInputStream(dysFile))
-      ).pt)
+      ))
     }
 
     val nickname = "AlphaBetaPlayer/CellScore"
@@ -84,7 +84,7 @@ object AlphaBetaPlayer {
       val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
       new AlphaBetaPlayer(scr, depth, PlacementTableEncoder.decode(
         new GZIPInputStream(new FileInputStream(dysFile))
-      ).pt)
+      ))
     }
 
     val nickname = "AlphaBetaPlayer/KindaiScore"

@@ -23,7 +23,7 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
 
     val zys = PlacementTableEncoder.decode(
       new GZIPInputStream(new FileInputStream(zysFile))
-    ).pt
+    )
 
     val player =
       new AlphaBetaPlayer(

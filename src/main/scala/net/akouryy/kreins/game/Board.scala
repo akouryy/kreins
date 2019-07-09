@@ -160,15 +160,21 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     val fm = fst.toMatrix
     val sm = snd.toMatrix
 
-    s"Board(${fst.code}, ${snd.code}):\n+1-2-3-4-5-6-7-8+\n" +
+    val bBlack = "\u001b[40m"
+    // val bCyan = "\u001b[46m"
+    val bDefault = "\u001b[0m"
+    val bGreen = "\u001b[37;48;5;22m"
+    val bWhite = "\u001b[30;48;5;231m"
+
+    s"Board(${fst.code}, ${snd.code}):\n${bGreen}  1 2 3 4 5 6 7 8   \n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
-        "|" +
+        bGreen + "ABCDEFGH" (i) + " " +
           (fr zip sr).map { case (f, s) =>
-            if(f) if(s) '!' else 'X' else if(s) 'O' else ' '
-          }.mkString(" ") +
-          "|" + "ABCDEFGH" (i)
+            if(f) if(s) "!!" else s"${bWhite}  " else if(s) s"${bBlack}  " else s"${bGreen}  "
+          }.mkString +
+          s"${bGreen} " + "ABCDEFGH" (i) + s"${bDefault}  "
       }.mkString("\n") +
-      "\n+---------------+"
+      s"\n${bGreen}  1 2 3 4 5 6 7 8   ${bDefault}"
   }
 }
 

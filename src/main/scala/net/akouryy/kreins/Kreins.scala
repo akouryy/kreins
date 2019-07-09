@@ -11,7 +11,7 @@ object Kreins {
   final case class CmdConfig(
     host: String = "localhost",
     port: Int = 8000,
-    playerName: String = "kreins　v0.1.1",
+    playerName: String = "kreins　v0.1.2",
     dysGzFile: String = ""
   )
 

@@ -5,7 +5,6 @@ import java.util.zip.GZIPOutputStream
 
 import net.akouryy.kreins.encoder.PlacementTableEncoder
 import net.akouryy.kreins.game.Board
-import net.akouryy.kreins.study.PatternWeight
 import net.akouryy.kreins.study.parser.GamParser
 import net.akouryy.kreins.util.{InputUtil, Loan}
 
@@ -13,7 +12,7 @@ import scala.collection.mutable
 import scala.io.Source
 
 object GamStudyDyagsekiAction {
-  def main(args: Array[String]) {
+  def _main(args: Array[String]) {
     val gamFileName = InputUtil.readLineWithRetry("gam file name: ").trim
     val wgtFileName = InputUtil.readLineWithRetry("dys.gz file name: ").trim
 
@@ -37,11 +36,11 @@ object GamStudyDyagsekiAction {
     val pt = placements.mapValues { ps =>
       val l = ps.toList
       val max = l.map(_._2).max
-      l.map { case (p, n) => (p, (n * 127 / max).toByte) }
+      l.map { case (p, n) => (p, n * 255 / max) }
     }.toMap /* convert to immutable Map */
 
     Loan(new GZIPOutputStream(new FileOutputStream(wgtFileName))) { o =>
-      PlacementTableEncoder.encode(o, PlacementTableEncoder.PlacementTable(pt))
+      PlacementTableEncoder.encode(o, pt)
     }
   }
 }
