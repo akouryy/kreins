@@ -13,10 +13,10 @@ class MinMaxPlayer(val scorer: Scorer, val depth: Int) extends Player {
     import CheckmateSearch._
     if(b.countEmpty <= 23) {
       new CheckmateSearch(false).run(b, 100) match {
-        case WillWin(stone) => stone
-        case WillLose =>
-          if(resign) -1 else fss.bestMove(b)
-        case _ => fss.bestMove(b)
+        case (WillWin, stone) => stone
+        case (WillLose, stone) =>
+          if(resign) -1 else stone
+        case (Timeout, stone) => stone
       }
     } else {
       fss.bestMove(b)

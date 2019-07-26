@@ -9,8 +9,8 @@ object CheckmateRandomPlayer extends Player {
     import CheckmateSearch._
     if(b.countEmpty <= 23) {
       new CheckmateSearch(false).run(b, 100) match {
-        case WillWin(stone) => stone
-        case WillLose =>
+        case (WillWin, stone) => stone
+        case (WillLose, _) =>
           if(resign) -1 else Player.randomThink(b)
         case _ => Player.randomThink(b)
       }

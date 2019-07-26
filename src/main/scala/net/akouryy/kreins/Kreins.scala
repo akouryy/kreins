@@ -10,10 +10,13 @@ object Kreins {
 
   final case class CmdConfig(
     host: String = "localhost",
+    isDebug: Boolean = false,
     port: Int = 8000,
     playerName: String = "kreins",
     dysGzFile: String = ""
   )
+
+  var isDebug = false
 
   val cmdParser = {
     val builder = OParser.builder[CmdConfig]
@@ -33,19 +36,19 @@ object Kreins {
       opt[String]('z', "dys")
         .required
         .action((x, c) => c.copy(dysGzFile = x))
-        .text("[required] .dys.gz file name")
+        .text("[required] .dys.gz file name"),
+      opt[Unit]('D', "debug")
+        .action((_, c) => c.copy(isDebug = true))
+        .text("Enable debug output (slow)")
     )
   }
 
   def main(args: Array[String]) = {
-    if(args.length == 0)
-      interactive()
-    else {
-      OParser.parse(cmdParser, args, CmdConfig()) match {
-        case Some(CmdConfig(host, port, name, dys)) =>
-          new Client(host, port, name, dys).run()
-        case None => // exit
-      }
+    OParser.parse(cmdParser, args, CmdConfig()) match {
+      case Some(CmdConfig(host, isDbg, port, name, dys)) =>
+        isDebug = isDbg
+        new Client(host, port, name, dys).run()
+      case None => // exit
     }
   }
 

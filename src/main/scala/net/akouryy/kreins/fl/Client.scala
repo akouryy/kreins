@@ -6,6 +6,7 @@ import java.util.zip.GZIPInputStream
 
 import game.Board
 import net.akouryy.kreins.encoder.PlacementTableEncoder
+import net.akouryy.kreins.util.ConsoleUtil.Ansi
 import player.AlphaBetaPlayer
 import scorer.KindaiScorer
 
@@ -29,7 +30,10 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
         zys
       )
 
+    var stats = initStats
+
     var state: GameState = Waiting
+    var amIBlack = false
 
     conn.connect { w =>
       w(Open(name).messageString)
@@ -50,31 +54,56 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
       if(s == null) sys.exit(2)
 
       parse(s).forall {
-        case Start(isBlack, herName, timeMS) =>
+        case Start(isBlack, _, timeMS) =>
           state = Playing(-1, Board.InitialBoard, timeMS)
+          amIBlack = isBlack
           if(isBlack) turn()
           true
-        case End(result, myStone, herStone, reason) =>
+        case End(result, _, _, _) =>
+          if(Kreins.isDebug) {
+            result match {
+              case EndResult.Win =>
+                if(amIBlack)
+                  stats = stats.copy(bWin = stats.bWin + 1)
+                else
+                  stats = stats.copy(wWin = stats.wWin + 1)
+              case EndResult.Lose =>
+                if(amIBlack)
+                  stats = stats.copy(bLose = stats.bLose + 1)
+                else
+                  stats = stats.copy(wLose = stats.wLose + 1)
+              case EndResult.Draw =>
+                if(amIBlack)
+                  stats = stats.copy(bLose = stats.bLose + 1)
+                else
+                  stats = stats.copy(wLose = stats.wLose + 1)
+            }
+          }
           state = Waiting
           player.reset()
           System.gc()
           true
-        case Bye(scores) =>
+        case Bye(_) =>
           false
         case Move(pos) =>
           val Playing(_, board, timeMS) = state
           state = Playing(pos, board.place(pos), timeMS)
           turn()
+          System.gc()
           true
         case Pass =>
           val Playing(_, board, timeMS) = state
           state = Playing(-1, board.pass, timeMS)
           turn()
+          System.gc()
           true
         case Ack(timeMS) =>
           val Playing(lastPos, board, _) = state
           state = Playing(lastPos, board, timeMS)
-          println(state)
+          if(Kreins.isDebug) {
+            println(stats)
+            println(state)
+          }
           true
       }
     }
@@ -87,8 +116,30 @@ object Client {
 
   case object Waiting extends GameState
 
-  final case class Playing(lastPos: Int, board: Board, timeMS: Int) extends GameState {
+  final case class Playing(lastPos: Int, board: Board, timeMS: Int)
+    extends GameState {
     override def toString = s"Playing(${timeMS}ms, ${board.toString(lastPos)})"
   }
 
+  final case class Stats(
+    bWin: Int,
+    bDraw: Int,
+    bLose: Int,
+    wWin: Int,
+    wDraw: Int,
+    wLose: Int
+  ) {
+    val win = bWin + wWin
+    val draw = bDraw + wDraw
+    val lose = bLose + wLose
+
+    override def toString =
+      Ansi.fSky(
+        f"""WIN  : me $win%03d-($draw%03d)-$lose%03d op
+           |BLACK: me $bWin%03d-($bDraw%03d)-$bLose%03d op
+           |WHITE: me $wWin%03d-($wDraw%03d)-$wLose%03d op""".stripMargin
+      )
+  }
+
+  val initStats = Stats(0, 0, 0, 0, 0, 0)
 }

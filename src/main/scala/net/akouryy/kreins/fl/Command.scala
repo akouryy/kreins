@@ -44,8 +44,8 @@ object Command {
           res match {
             case "WIN" => EndResult.Win
             case "LOSE" => EndResult.Lose
-            case "TIE" => EndResult.Tie
-            case _ => Console.err.println(s"unknown result: '$res'"); EndResult.Tie
+            case "TIE" => EndResult.Draw
+            case _ => Console.err.println(s"unknown result: '$res'"); EndResult.Draw
           },
           Try(n.toInt).getOrElse(-1),
           Try(m.toInt).getOrElse(-1),

@@ -3,17 +3,20 @@ package game
 
 import util.BitUtil
 
-final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) {
+final class Board(
+  val fst: Panel,
+  val snd: Panel,
+  private val _pass: Board,
+  val countEmpty: Int
+) {
 
   import Board._
 
-  lazy val pass = if(_pass != null) _pass else Board(snd, fst, this)
+  lazy val pass = if(_pass != null) _pass else Board(snd, fst, this, countEmpty)
 
   lazy val countFst = BitUtil.popcount(fst.code)
 
   lazy val countSnd = BitUtil.popcount(snd.code)
-
-  lazy val countEmpty = BitUtil.popcount(~(fst | snd).code)
 
   lazy val isEnd =
     countEmpty == 0 ||
@@ -49,25 +52,25 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
       NotEnd
     }
 
-  @inline def &(c: Long) = Board(fst & c, snd & c)
+  @inline def &(c: Long) = Board(fst & c, snd & c, null, -1)
 
-  @inline def |(c: Long) = Board(fst | c, snd | c)
+  @inline def |(c: Long) = Board(fst | c, snd | c, null, -1)
 
   @inline def mirrorWithDiagRightDown =
-    Board(fst.mirrorWithDiagRightDown, snd.mirrorWithDiagRightDown)
+    Board(fst.mirrorWithDiagRightDown, snd.mirrorWithDiagRightDown, null, countEmpty)
 
   @inline def mirrorWithDiagRightUp =
-    Board(fst.mirrorWithDiagRightUp, snd.mirrorWithDiagRightUp)
+    Board(fst.mirrorWithDiagRightUp, snd.mirrorWithDiagRightUp, null, countEmpty)
 
   @inline def mirrorWithHorizontal =
-    Board(fst.mirrorWithHorizontal, snd.mirrorWithHorizontal)
+    Board(fst.mirrorWithHorizontal, snd.mirrorWithHorizontal, null, countEmpty)
 
   @inline def mirrorWithVertical =
-    Board(fst.mirrorWithVertical, snd.mirrorWithVertical)
+    Board(fst.mirrorWithVertical, snd.mirrorWithVertical, null, countEmpty)
 
-  @inline def rotate45ACW = Board(fst.rotate45ACW, snd.rotate45ACW)
+  @inline def rotate45ACW = Board(fst.rotate45ACW, snd.rotate45ACW, null, countEmpty)
 
-  @inline def rotate45CW = Board(fst.rotate45CW, snd.rotate45CW)
+  @inline def rotate45CW = Board(fst.rotate45CW, snd.rotate45CW, null, countEmpty)
 
   /**
     * https://primenumber.hatenadiary.jp/entry/2016/12/26/063226
@@ -153,7 +156,18 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
 
   @inline def place(stone: Int): Board = {
     val flipped = possToFlip(stone)
-    Board(snd & ~flipped.code, fst | flipped | (1L << stone))
+    Board(snd & ~flipped.code, fst | flipped | (1L << stone), null, countEmpty - 1)
+  }
+
+  @inline override def equals(that: Any) = that match {
+    case b: Board => fst == b.fst && snd == b.snd
+    case _ => false
+  }
+
+  @inline override def hashCode = {
+    val f = fst.code
+    val s = snd.code
+    ((f.toInt * 31 + (f >>> 32).toInt) * 31 + s.toInt) * 31 + (s >>> 32).toInt
   }
 
   override def toString = toString(-1)
@@ -169,7 +183,8 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     val bWhite = "\u001b[107m\u001b[30;48;5;231m"
     val bYellow = "\u001b[43m"
 
-    s"Board($countFst-$countSnd, ${fst.code}, ${snd.code}):\n$bGreen  1 2 3 4 5 6 7 8   \n" +
+    s"Board($countFst-$countSnd-($countEmpty), ${fst.code}, ${snd.code}):\n" +
+      s"$bGreen  1 2 3 4 5 6 7 8   \n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         bGreen + "ABCDEFGH" (i) + " " +
           (fr zip sr).zipWithIndex.map { case ((f, s), j) =>
@@ -183,17 +198,30 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
 }
 
 object Board {
+
+  @inline def apply(
+    fst: Panel,
+    snd: Panel,
+    _pass: Board,
+    countEmpty: Int
+  ) = new Board(fst, snd, _pass, countEmpty)
+
+  @inline def fromPanels(fst: Panel, snd: Panel) =
+    new Board(
+      fst, snd, null, BitUtil.popcount(~(fst.code | snd.code))
+    )
+
+
   val InitialBoard = Board(
-    Panel(0x0000000810000000L),
-    Panel(0x0000001008000000L)
+    Panel(0x0000000810000000L), Panel(0x0000001008000000L), null, 60
   )
 
   def fromMatrix(f: Seq[Seq[Boolean]], s: Seq[Seq[Boolean]]) = {
-    Board(Panel.fromMatrix(f), Panel.fromMatrix(s))
+    fromPanels(Panel.fromMatrix(f), Panel.fromMatrix(s))
   }
 
   def fromScrLine(s: String) =
-    Board(
+    fromPanels(
       Panel(s.reverseMap(c => if(c == 'O') 1L else 0L).reduce(_ << 1 | _)),
       Panel(s.reverseMap(c => if(c == 'X') 1L else 0L).reduce(_ << 1 | _))
     )

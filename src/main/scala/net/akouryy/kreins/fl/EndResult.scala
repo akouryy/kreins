@@ -5,10 +5,10 @@ sealed trait EndResult
 
 object EndResult {
 
-  final case object Win extends EndResult
+  case object Win extends EndResult
 
-  final case object Lose extends EndResult
+  case object Lose extends EndResult
 
-  final case object Tie extends EndResult
+  case object Draw extends EndResult
 
 }

@@ -34,11 +34,9 @@ class BoardSpec extends FlatSpec with DiagrammedAssertions {
         xr.zip(yr).map { case (xc, yc) => xc && !yc }
       }
 
-      val x = Panel.fromMatrix(xm)
-      val y = Panel.fromMatrix(ym)
-      val env = envFn(Board(x, y))
+      val env = envFn(Board.fromMatrix(xm, ym))
       val ans = Panel.fromMatrix(genPanelMatrix(ansFn(xm, ym, _, _, env)))
-      assert(fn(Board(x, y), env) === ans)
+      assert(fn(Board.fromMatrix(xm, ym), env) === ans)
     }
   }
 
@@ -123,7 +121,7 @@ class BoardSpec extends FlatSpec with DiagrammedAssertions {
         (am, bm, i, j, pos) => {
           if(pos == -1) {
             /* skip case */
-            (Board(Panel.fromMatrix(am), Panel.fromMatrix(bm)).possToFlip(-1)
+            (Board.fromMatrix(am, bm).possToFlip(-1)
               .code >>> (i << 3 | j) & 1) == 1
           } else {
             bm(i)(j) &&

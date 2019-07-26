@@ -28,15 +28,15 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
     var maxTime = 0L
     var sumTime = 0L
     for {
-      isDrawOK <- Seq(false, true)
       (b, s) <- scores
+      isDrawOK <- Seq(false, true)
       ars = new CheckmateSearch(isDrawOK)
     } {
       val t0 = System.nanoTime()
       val result = {
         import CheckmateSearch._
-        ars.run(b, 1000) match {
-          case WillWin(_) | WillWinPass => true
+        ars.run(b, 1000)._1 match {
+          case WillWin => true
           case WillLose => false
           case Timeout => throw new RuntimeException("timeout")
         }

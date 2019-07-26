@@ -41,7 +41,7 @@ object PlacementTableEncoder {
         (pos.toByte, score.toInt)
       }.toList
 
-      ret(Board(Panel(fstCode), Panel(sndCode))) = ss
+      ret(Board.fromPanels(Panel(fstCode), Panel(sndCode))) = ss
     }
 
     ret.toMap

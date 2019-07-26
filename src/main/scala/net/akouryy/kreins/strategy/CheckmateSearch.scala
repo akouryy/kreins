@@ -19,15 +19,15 @@ final class CheckmateSearch(isDrawOK: Boolean) {
 
   private[this] val MAX = 100000000
 
-  private[this] var startTimeMS = System.currentTimeMillis
-  private[this] var maxTimeMS = 500L
+  private[this] var endTimeMS = System.currentTimeMillis
 
-  private[this] val memo = mutable.Map[Board, (Int, Int)]()
+  private[this] var memo: Array[mutable.Map[Board, (Int, Int)]] = _
 
-  @inline private[this] def retrieve(n: Node) = memo.getOrElse(n.board, (1, 1))
+  @inline private[this] def retrieve(n: Node) =
+    memo(n.board.countEmpty).getOrElse(n.board, (1, 1))
 
   @inline private[this] def store(n: Node, pr: Int, dpr: Int) {
-    memo(n.board) = (pr, dpr)
+    memo(n.board.countEmpty)(n.board) = (pr, dpr)
   }
 
   @inline private[this] def storeProven(n: Node) = {
@@ -42,50 +42,50 @@ final class CheckmateSearch(isDrawOK: Boolean) {
     store(n, MAX, 0)
   }
 
-  def run(initialBoard: Board, maxTimeMS: Long): RunResult = {
-    startTimeMS = System.currentTimeMillis
-    this.maxTimeMS = maxTimeMS
+  def run(initialBoard: Board, maxTimeMS: Long): (RunResult, Int) = {
+    endTimeMS = System.currentTimeMillis + maxTimeMS
 
-    memo.clear()
+    memo = Array.fill(initialBoard.countEmpty + 1)(mutable.Map[Board, (Int, Int)]())
     nLoops = 0
 
     val root = Node(initialBoard, isOr = true)
     root.thProof = MAX
     root.thDisproof = MAX
     dfWpn(root)
+    nNodes = memo.map(_.size).sum
+    memo = null
 
-    if(root.thProof == 0) {
-      for(c <- root.children) if(c.thDisproof == 0) {
-        var pp = root.board.possPlaceable.code
-        if(pp == 0) {
-          return WillWinPass
-        }
-        while(pp != 0) {
-          val i = BitUtil.firstHighBitPos(pp)
-          if(c.board == root.board.place(i)) {
-            return WillWin(i)
-          }
-          pp &= ~(1L << i)
-        }
-        Console.err.println(s"[CMSearch.run] no placement for children\n$c")
-        return Timeout
+    val result =
+      if(root.thProof == 0) WillWin
+      else if(root.thDisproof == 0) WillLose
+      else Timeout
+
+    generateMoves(root) // for when root.isEnd1 but !root.isEnd
+
+    if(root.children.isEmpty) return (result, -1)
+
+    val bestBoard =
+      root.children.find(_.thDisproof == 0)
+        .getOrElse(root.children.maxBy(_.thProof))
+        .board
+
+    var bestPos = -1
+
+    var pp = root.board.possPlaceable.code
+    while(pp != 0) {
+      val i = BitUtil.firstHighBitPos(pp)
+      if(bestBoard == root.board.place(i)) {
+        bestPos = i
       }
-      if(root.children.isEmpty) {
-        WillWinPass
-      } else {
-        Console.err.println(s"[CMSearch.run] no child to place\n$root\n${root.children}")
-        Timeout
-      }
-    } else if(root.thDisproof == 0) {
-      WillLose
-    } else {
-      Timeout
+      pp &= ~(1L << i)
     }
+
+    (result, bestPos)
   }
 
   private[this] def dfWpn(n: Node) {
     nLoops += 1
-    val (pr, dpr) = retrieve(n)
+    var (pr, dpr) = retrieve(n)
     if(n.thProof <= pr || n.thDisproof <= dpr) {
       n.thProof = pr
       n.thDisproof = dpr
@@ -101,24 +101,38 @@ final class CheckmateSearch(isDrawOK: Boolean) {
       case Board.NotEnd =>
         generateMoves(n)
         // store(n, n.thProof, n.thDisproof) // unnecessary because there is no cycle
+        var prC0 = 0
         while(true) {
-          val (dpr, pr) = prMaxDprMin(n)
+          locally { // prMax, dprMin
+            var prCMax = 0
+            pr = MAX
+            var cnt = -1
+            for(c <- n.children) {
+              val (prC, dprC) = retrieve(c)
+              prCMax = prCMax max prC
+              pr = pr min dprC
+              if(prC != 0) cnt += 1
+            }
+            dpr = (prCMax + cnt.clampLow(0)).clampHigh(MAX)
+          }
           if(n.thProof <= pr || n.thDisproof <= dpr || !resourcesAvailable()) {
             n.thProof = pr // [2]
             n.thDisproof = dpr // [2]
             store(n, pr, dpr)
             return
           }
-          val (child, prc, dpr2) = select(n)
-          child.thProof = (n.thDisproof + prc - dpr).clamp(0, MAX)
+          val (child, prC, dpr2) = select(n, prC0)
+          prC0 = prC
+          child.thProof = (n.thDisproof + prC - dpr).clamp(0, MAX)
           child.thDisproof = (n.thProof min (dpr2 + 1)).clampHigh(MAX)
           dfWpn(child)
         }
     }
   }
 
-  @inline private[this] def select(n: Node): (Node, Int, Int) = {
-    var prC, dprC, dpr2 = MAX
+  @inline private[this] def select(n: Node, prC0: Int): (Node, Int, Int) = {
+    var prC = prC0
+    var dprC, dpr2 = MAX
     var best: Node = null
 
     for(c <- n.children) {
@@ -134,22 +148,6 @@ final class CheckmateSearch(isDrawOK: Boolean) {
       if(pr == MAX) return (best, prC, dpr2)
     }
     (best, prC, dpr2)
-  }
-
-  @inline private[this] def prMaxDprMin(n: Node) = {
-    var prMax = 0
-    var dprMin = MAX
-    var cnt = -1
-    for(c <- n.children) {
-      val (pr, dpr) = retrieve(c)
-      prMax = prMax max pr
-      dprMin = dprMin min dpr
-      if(pr != 0) cnt += 1
-    }
-    (
-      (prMax + cnt.clampLow(0)).clampHigh(MAX),
-      dprMin
-    )
   }
 
   @inline private[this] def generateMoves(n: Node) {
@@ -171,9 +169,9 @@ final class CheckmateSearch(isDrawOK: Boolean) {
   }
 
   @inline private[this] def resourcesAvailable() =
-    System.currentTimeMillis - startTimeMS < maxTimeMS
+    System.currentTimeMillis < endTimeMS
 
-  def nNodes = memo.size
+  var nNodes = 0
 
   var nLoops = 0
 }
@@ -182,9 +180,7 @@ object CheckmateSearch {
 
   sealed trait RunResult
 
-  final case class WillWin(stone: Int) extends RunResult
-
-  case object WillWinPass extends RunResult
+  case object WillWin extends RunResult
 
   case object WillLose extends RunResult
 

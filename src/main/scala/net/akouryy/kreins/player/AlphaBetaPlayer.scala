@@ -6,9 +6,10 @@ import java.util.zip.GZIPInputStream
 
 import encoder.PlacementTableEncoder
 import game.Board
-import util.{ExtInt, InputUtil}
 import scorer.Scorer
 import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
+import util.ConsoleUtil.Ansi
+import util.InputUtil
 
 final class AlphaBetaPlayer(
   val scorer: Scorer,
@@ -41,23 +42,27 @@ final class AlphaBetaPlayer(
 
     if(rest <= 25 || absolutelyWin) {
       val maxTimeMS =
-        if(rest <= 24 || absolutelyWin) ((time - 1000) / 4).clampHigh(1000)
-        else ((time - 10000) / 4).clampHigh(500)
-      cmSearch.run(board, maxTimeMS.toLong) match {
-        case WillWin(stone) =>
-          println(s"win!!! $stone (in $rest)")
-          absolutelyWin = true
-          stone
-        case WillLose =>
-          println(s"lose!!! (in $rest)")
-          if(resign) -1 else searcher.bestMove(board)
-        case Timeout =>
-          println(s"timeout!!! ($maxTimeMS ms, ${cmSearch.nNodes} nodes, ${cmSearch.nLoops} loops)")
-          searcher.bestMove(board)
-        case notReachHere =>
-          println(s"notReachHere!!! $notReachHere")
-          searcher.bestMove(board)
+        if(rest <= 19 || absolutelyWin) {
+          if(time < 10000) time / 5 else 2000
+        } else if(rest <= 21) { // 20 or 21!!!
+          if(time < 10000) time / 5 else if(time < 18000) time - 8000 else 10000
+        } else {
+          if(time < 20000) time / 10 else 2000
+        }
+      val (result, stone) = cmSearch.run(board, maxTimeMS.toLong)
+      if(Kreins.isDebug) {
+        result match {
+          case WillWin =>
+            println(Ansi.bOrange(s"win!!! $stone (in $rest)"))
+          case WillLose =>
+            println(Ansi.fOrange(s"lose!!! $stone (in $rest)"))
+          case Timeout =>
+            println(s"timeout!!! $stone ($maxTimeMS ms, ${cmSearch.nNodes} " +
+              s"nodes, ${cmSearch.nLoops} loops)")
+        }
       }
+      absolutelyWin = result == WillWin
+      stone
     } else {
       searcher.bestMove(board)
     }
