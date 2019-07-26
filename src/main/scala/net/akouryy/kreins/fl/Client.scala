@@ -16,7 +16,9 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
 
   case object Waiting extends GameState
 
-  final case class Playing(board: Board, timeMS: Int) extends GameState
+  final case class Playing(lastPos: Int, board: Board, timeMS: Int) extends GameState {
+    override def toString = s"Playing(${timeMS}ms, ${board.toString(lastPos)})"
+  }
 
   def run() = {
     import Command._
@@ -38,15 +40,15 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
       w(Open(name).messageString)
     } { (s, w) =>
       def turn() = {
-        val Playing(board, timeMS) = state
+        val Playing(_, board, timeMS) = state
 
         val pos = player.think(board, resign = false, timeMS)
         if(pos == -1) {
           w(Pass.messageString)
-          state = Playing(board.pass, timeMS)
+          state = Playing(-1, board.pass, timeMS)
         } else {
           w(Move(pos).messageString)
-          state = Playing(board.place(pos), timeMS)
+          state = Playing(pos, board.place(pos), timeMS)
         }
       }
 
@@ -54,7 +56,7 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
 
       parse(s).forall {
         case Start(isBlack, herName, timeMS) =>
-          state = Playing(Board.InitialBoard, timeMS)
+          state = Playing(-1, Board.InitialBoard, timeMS)
           if(isBlack) turn()
           true
         case End(result, myStone, herStone, reason) =>
@@ -65,18 +67,18 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
         case Bye(scores) =>
           false
         case Move(pos) =>
-          val Playing(board, timeMS) = state
-          state = Playing(board.place(pos), timeMS)
+          val Playing(_, board, timeMS) = state
+          state = Playing(pos, board.place(pos), timeMS)
           turn()
           true
         case Pass =>
-          val Playing(board, timeMS) = state
-          state = Playing(board.pass, timeMS)
+          val Playing(_, board, timeMS) = state
+          state = Playing(-1, board.pass, timeMS)
           turn()
           true
         case Ack(timeMS) =>
-          val Playing(board, _) = state
-          state = Playing(board, timeMS)
+          val Playing(lastPos, board, _) = state
+          state = Playing(lastPos, board, timeMS)
           println(state)
           true
       }

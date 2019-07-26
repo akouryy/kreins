@@ -55,6 +55,9 @@ class AlphaBetaPlayer(
         case WillLose =>
           println(s"lose!!! (in $rest)")
           if(resign) -1 else searcher.bestMove(board)
+        case Timeout =>
+          println(s"timeout!!!")
+          searcher.bestMove(board)
         case _ => searcher.bestMove(board)
       }
     } else {
