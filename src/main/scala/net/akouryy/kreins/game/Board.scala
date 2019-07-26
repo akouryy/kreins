@@ -1,6 +1,7 @@
 package net.akouryy.kreins
 package game
 
+import net.akouryy.kreins.util.ConsoleUtil.Ansi
 import util.BitUtil
 
 final class Board(
@@ -176,7 +177,7 @@ final class Board(
     val fm = fst.toMatrix
     val sm = snd.toMatrix
 
-    val bBlack = "\u001b[40m"
+    val bBlack = Ansi.bBlackStart
     // val bCyan = "\u001b[46m"
     val bDefault = "\u001b[0m"
     val bGreen = "\u001b[42m\u001b[37;48;5;22m"
@@ -184,14 +185,14 @@ final class Board(
     val bYellow = "\u001b[43m"
 
     s"Board($countFst-$countSnd-($countEmpty), ${fst.code}, ${snd.code}):\n" +
-      s"$bGreen  1 2 3 4 5 6 7 8   \n" +
+      s"$bGreen  1 2 3 4 5 6 7 8   $bDefault\n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         bGreen + "ABCDEFGH" (i) + " " +
           (fr zip sr).zipWithIndex.map { case ((f, s), j) =>
             if(newPos == i * 8 + j) s"$bYellow  "
             else if(f) if(s) "!!" else s"$bWhite  " else if(s) s"$bBlack  " else s"$bGreen  "
           }.mkString +
-          s"$bGreen " + "ABCDEFGH" (i) + s"$bDefault  "
+          s"$bGreen " + "ABCDEFGH" (i) + s"$bBlack  "
       }.mkString("\n") +
       s"\n$bGreen  1 2 3 4 5 6 7 8   $bDefault"
   }

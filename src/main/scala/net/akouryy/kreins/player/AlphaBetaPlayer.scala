@@ -47,7 +47,7 @@ final class AlphaBetaPlayer(
         } else if(rest <= 21) { // 20 or 21!!!
           if(time < 10000) time / 5 else if(time < 18000) time - 8000 else 10000
         } else {
-          if(time < 20000) time / 10 else 2000
+          if(time < 20000) time / 20 else 1000
         }
       val (result, stone) = cmSearch.run(board, maxTimeMS.toLong)
       if(Kreins.isDebug) {
@@ -62,7 +62,11 @@ final class AlphaBetaPlayer(
         }
       }
       absolutelyWin = result == WillWin
-      stone
+      if(result == Timeout) {
+        searcher.bestMove(board)
+      } else {
+        stone
+      }
     } else {
       searcher.bestMove(board)
     }
