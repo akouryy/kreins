@@ -1,7 +1,7 @@
 package net.akouryy.kreins
 package strategy
 
-import game.{Board, Panel}
+import game.Board
 import util.{BitUtil, ExtInt}
 
 import scala.collection.mutable
@@ -91,7 +91,7 @@ final class CheckmateSearch(isDrawOK: Boolean) {
       n.thDisproof = dpr
       return
     }
-    n.board.result match {
+    n.board.result1 match {
       case Board.FstWin(_) =>
         storeProven(n)
       case Board.SndWin(_) =>

@@ -169,7 +169,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     val bWhite = "\u001b[107m\u001b[30;48;5;231m"
     val bYellow = "\u001b[43m"
 
-    s"Board(${fst.code}, ${snd.code}):\n$bGreen  1 2 3 4 5 6 7 8   \n" +
+    s"Board($countFst-$countSnd, ${fst.code}, ${snd.code}):\n$bGreen  1 2 3 4 5 6 7 8   \n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         bGreen + "ABCDEFGH" (i) + " " +
           (fr zip sr).zipWithIndex.map { case ((f, s), j) =>

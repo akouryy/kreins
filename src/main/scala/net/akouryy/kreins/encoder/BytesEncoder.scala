@@ -6,7 +6,7 @@ object BytesEncoder {
   def encodeOne(o: OutputStream, bc: Int, bd: Long) {
     for(i <- bc - 1 to 0 by -1) {
       assert(0 <= bc && bc <= 8)
-      o.write((bd >>> i * 8 & 255).toByte)
+      o.write((bd >>> i * 8 & 255).toInt)
     }
   }
 

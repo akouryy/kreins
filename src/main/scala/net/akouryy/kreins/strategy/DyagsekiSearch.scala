@@ -13,7 +13,7 @@ class DyagsekiSearch(val pt: Map[Board, List[(Byte, Int)]]) {
       Some(-1)
     } else {
       for(
-        (b, pFn) <- Seq[(Board, Int => Int)](
+        (b, pFn) <- Seq[(Board, Byte => Byte)](
           (board, p => p),
           (board.mirrorWithVertical.mirrorWithHorizontal, Pos.rotate180),
           (board.mirrorWithDiagRightUp, Pos.mirrorWithDiagRightUp),
@@ -27,7 +27,7 @@ class DyagsekiSearch(val pt: Map[Board, List[(Byte, Int)]]) {
             rand <= 0
           }) {
             println(ls)
-            return Some(pFn(p0))
+            return Some(pFn(p0).toInt)
           }
         }
       }

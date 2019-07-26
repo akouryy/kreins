@@ -1,11 +1,8 @@
 package net.akouryy.kreins
 package player
 
-import scala.io.StdIn
 import game.Board
-import net.akouryy.kreins.util.InputUtil
-import scorer.Scorer
-import strategy.{CheckmateSearch, MinMaxSearch}
+import strategy.CheckmateSearch
 
 object CheckmateRandomPlayer extends Player {
   def think(b: Board, resign: Boolean, time: Int) = {

@@ -1,7 +1,6 @@
 package net.akouryy.kreins.game
 
 import org.scalatest._
-import net.akouryy.kreins.util.BitUtil
 
 import scala.util.Random
 

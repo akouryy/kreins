@@ -9,16 +9,11 @@ import net.akouryy.kreins.encoder.PlacementTableEncoder
 import player.AlphaBetaPlayer
 import scorer.KindaiScorer
 
-class Client(host: String, port: Int, name: String, zysFile: String) {
+final class Client(host: String, port: Int, name: String, zysFile: String) {
+
+  import Client._
+
   val conn = Connector(host, port)
-
-  sealed trait GameState
-
-  case object Waiting extends GameState
-
-  final case class Playing(lastPos: Int, board: Board, timeMS: Int) extends GameState {
-    override def toString = s"Playing(${timeMS}ms, ${board.toString(lastPos)})"
-  }
 
   def run() = {
     import Command._
@@ -84,4 +79,16 @@ class Client(host: String, port: Int, name: String, zysFile: String) {
       }
     }
   }
+}
+
+object Client {
+
+  sealed trait GameState
+
+  case object Waiting extends GameState
+
+  final case class Playing(lastPos: Int, board: Board, timeMS: Int) extends GameState {
+    override def toString = s"Playing(${timeMS}ms, ${board.toString(lastPos)})"
+  }
+
 }

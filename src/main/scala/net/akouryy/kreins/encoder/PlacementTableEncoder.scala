@@ -1,7 +1,7 @@
 package net.akouryy.kreins
 package encoder
 
-import java.io.{InputStream, ObjectInputStream, ObjectOutputStream, OutputStream}
+import java.io.{InputStream, OutputStream}
 
 import game.{Board, Panel}
 
@@ -15,10 +15,10 @@ object PlacementTableEncoder {
     for((b, ss) <- pt) {
       BytesEncoder.encodeOne(o, 8, b.fst.code)
       BytesEncoder.encodeOne(o, 8, b.snd.code)
-      BytesEncoder.encodeOne(o, 1, ss.size)
+      BytesEncoder.encodeOne(o, 1, ss.size.toLong)
       for((pos, score) <- ss) {
-        BytesEncoder.encodeOne(o, 1, pos)
-        BytesEncoder.encodeOne(o, 1, score)
+        BytesEncoder.encodeOne(o, 1, pos.toLong)
+        BytesEncoder.encodeOne(o, 1, score.toLong)
       }
     }
   }

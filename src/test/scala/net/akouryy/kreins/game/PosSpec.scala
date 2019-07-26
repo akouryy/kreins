@@ -15,7 +15,7 @@ class PosSpec extends FlatSpec with DiagrammedAssertions {
       15, 14, 13, 12, 11, 10, 9, 8,
       7, 6, 5, 4, 3, 2, 1, 0
     ).zipWithIndex.foreach { case (p, r) =>
-      assert(Pos.rotate180(p) === r)
+      assert(Pos.rotate180(p.toByte) === r.toByte)
     }
   }
 
@@ -30,7 +30,7 @@ class PosSpec extends FlatSpec with DiagrammedAssertions {
       6, 14, 22, 30, 38, 46, 54, 62,
       7, 15, 23, 31, 39, 47, 55, 63
     ).zipWithIndex.foreach { case (p, r) =>
-      assert(Pos.mirrorWithDiagRightDown(p) === r)
+      assert(Pos.mirrorWithDiagRightDown(p.toByte) === r.toByte)
     }
   }
 
@@ -45,7 +45,7 @@ class PosSpec extends FlatSpec with DiagrammedAssertions {
       57, 49, 41, 33, 25, 17, 9, 1,
       56, 48, 40, 32, 24, 16, 8, 0
     ).zipWithIndex.foreach { case (p, r) =>
-      assert(Pos.mirrorWithDiagRightUp(p) === r)
+      assert(Pos.mirrorWithDiagRightUp(p.toByte) === r.toByte)
     }
   }
 }

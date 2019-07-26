@@ -3,9 +3,6 @@ package study.parser
 
 import game.Board
 import game.Log
-import util.Loan
-
-import scala.io.Source
 
 object GamParser {
   def parse(s: String): Either[String, Log] = {

@@ -43,7 +43,7 @@ final class AlphaBetaPlayer(
       val maxTimeMS =
         if(rest <= 24 || absolutelyWin) ((time - 1000) / 4).clampHigh(1000)
         else ((time - 10000) / 4).clampHigh(500)
-      cmSearch.run(board, maxTimeMS) match {
+      cmSearch.run(board, maxTimeMS.toLong) match {
         case WillWin(stone) =>
           println(s"win!!! $stone (in $rest)")
           absolutelyWin = true
