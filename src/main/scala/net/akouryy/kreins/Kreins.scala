@@ -11,7 +11,7 @@ object Kreins {
   final case class CmdConfig(
     host: String = "localhost",
     port: Int = 8000,
-    playerName: String = "kreins　v0.1.2",
+    playerName: String = "kreins",
     dysGzFile: String = ""
   )
 
@@ -23,17 +23,17 @@ object Kreins {
       head("kreins", "0.1"),
       opt[String]('H', "host")
         .action((x, c) => c.copy(host = x))
-        .text("host name"),
+        .text("[required] host name"),
       opt[Int]('p', "port")
         .action((x, c) => c.copy(port = x))
-        .text("port number"),
+        .text("[required] port number"),
       opt[String]('n', "name")
         .action((x, c) => c.copy(playerName = x))
-        .text("player name"),
+        .text("[required] player name"),
       opt[String]('z', "dys")
         .required
         .action((x, c) => c.copy(dysGzFile = x))
-        .text(".dys.gz file name")
+        .text("[required] .dys.gz file name")
     )
   }
 

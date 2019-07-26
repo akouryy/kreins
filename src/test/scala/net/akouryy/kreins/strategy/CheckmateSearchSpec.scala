@@ -28,9 +28,10 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
     var maxTime = 0L
     var sumTime = 0L
     var ss = List[String]()
-    for {isDrawOK <- Seq(false, true)
-         (b, s) <- scores
-         ars = new CheckmateSearch(isDrawOK)
+    for {
+      isDrawOK <- Seq(false, true)
+      (b, s) <- scores
+      ars = new CheckmateSearch(isDrawOK)
     } {
       val t0 = System.nanoTime()
       val result = {

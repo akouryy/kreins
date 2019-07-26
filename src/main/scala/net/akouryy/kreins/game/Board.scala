@@ -156,25 +156,29 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     Board(snd & ~flipped.code, fst | flipped | (1L << stone))
   }
 
-  override def toString = {
+  override def toString = toString(-1)
+
+  def toString(newPos: Int) = {
     val fm = fst.toMatrix
     val sm = snd.toMatrix
 
     val bBlack = "\u001b[40m"
     // val bCyan = "\u001b[46m"
     val bDefault = "\u001b[0m"
-    val bGreen = "\u001b[37;48;5;22m"
-    val bWhite = "\u001b[30;48;5;231m"
+    val bGreen = "\u001b[42m\u001b[37;48;5;22m"
+    val bWhite = "\u001b[107m\u001b[30;48;5;231m"
+    val bYellow = "\u001b[43m"
 
-    s"Board(${fst.code}, ${snd.code}):\n${bGreen}  1 2 3 4 5 6 7 8   \n" +
+    s"Board(${fst.code}, ${snd.code}):\n$bGreen  1 2 3 4 5 6 7 8   \n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         bGreen + "ABCDEFGH" (i) + " " +
-          (fr zip sr).map { case (f, s) =>
-            if(f) if(s) "!!" else s"${bWhite}  " else if(s) s"${bBlack}  " else s"${bGreen}  "
+          (fr zip sr).zipWithIndex.map { case ((f, s), j) =>
+            if(newPos == i * 8 + j) s"$bYellow  "
+            else if(f) if(s) "!!" else s"$bWhite  " else if(s) s"$bBlack  " else s"$bGreen  "
           }.mkString +
-          s"${bGreen} " + "ABCDEFGH" (i) + s"${bDefault}  "
+          s"$bGreen " + "ABCDEFGH" (i) + s"$bDefault  "
       }.mkString("\n") +
-      s"\n${bGreen}  1 2 3 4 5 6 7 8   ${bDefault}"
+      s"\n$bGreen  1 2 3 4 5 6 7 8   $bDefault"
   }
 }
 
