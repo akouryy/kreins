@@ -14,7 +14,7 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
         if(s.isEmpty) {
           None
         } else if(s.length == 2) {
-          Some(Board.fromScrLine(s(0)), s(1).toInt)
+          Some((Board.fromScrLine(s(0)), s(1).toInt))
         } else {
           throw new Exception("invalid score file")
         }
@@ -27,7 +27,6 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
     var sumNodes = 0
     var maxTime = 0L
     var sumTime = 0L
-    var ss = List[String]()
     for {
       isDrawOK <- Seq(false, true)
       (b, s) <- scores
@@ -48,14 +47,10 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
       maxNodes = Math.max(maxNodes, ars.nNodes)
       sumTime += t1 - t0
       maxTime = Math.max(maxTime, t1 - t0)
-      ss :+= f"${i / 2}%3s ${b.countEmpty}%2s ${ars.nNodes}%8s : ${
+      println(f"${i / 2}%3s ${b.countEmpty}%2s ${ars.nNodes}%8sN ${ars.nLoops}%8sL : ${
         java.text.NumberFormat.getIntegerInstance.format(t1 - t0)
-      }%14sns"
+      }%14sns")
       i += 1
-      if(i >= 113) {
-        println(ss.mkString("\n"))
-        ss = List()
-      }
     }
     println(s"nodes max: $maxNodes; sum: $sumNodes\ntime max: ${
       java.text.NumberFormat.getIntegerInstance.format(maxTime)

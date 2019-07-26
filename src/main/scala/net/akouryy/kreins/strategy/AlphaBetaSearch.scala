@@ -5,7 +5,7 @@ import game.Board
 import util.BitUtil
 import scorer.Scorer
 
-class AlphaBetaSearch(val scorer: Scorer, val depth: Int) {
+final class AlphaBetaSearch(val scorer: Scorer, val depth: Int) {
   def bestMove(board: Board) = {
     val pp = board.possPlaceable.code
 

@@ -4,14 +4,13 @@ package player
 import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
 
-import scala.io.StdIn
+import encoder.PlacementTableEncoder
 import game.Board
-import net.akouryy.kreins.encoder.PlacementTableEncoder
-import net.akouryy.kreins.util.InputUtil
+import util.{ExtInt, InputUtil}
 import scorer.Scorer
 import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
 
-class AlphaBetaPlayer(
+final class AlphaBetaPlayer(
   val scorer: Scorer,
   val depth: Int,
   val dys: Map[Board, List[(Byte, Int)]]
@@ -41,13 +40,10 @@ class AlphaBetaPlayer(
     )
 
     if(rest <= 25 || absolutelyWin) {
-      cmSearch.run(
-        board,
-        maxTimeMS =
-          if(rest <= 24 || absolutelyWin) (time / 2) max 50 min 500
-          else if(rest <= 30) (time / 5) max 50 min 200
-          else 50
-      ) match {
+      val maxTimeMS =
+        if(rest <= 24 || absolutelyWin) ((time - 1000) / 4).clampHigh(1000)
+        else ((time - 10000) / 4).clampHigh(500)
+      cmSearch.run(board, maxTimeMS) match {
         case WillWin(stone) =>
           println(s"win!!! $stone (in $rest)")
           absolutelyWin = true
@@ -56,9 +52,11 @@ class AlphaBetaPlayer(
           println(s"lose!!! (in $rest)")
           if(resign) -1 else searcher.bestMove(board)
         case Timeout =>
-          println(s"timeout!!!")
+          println(s"timeout!!! ($maxTimeMS ms, ${cmSearch.nNodes} nodes, ${cmSearch.nLoops} loops)")
           searcher.bestMove(board)
-        case _ => searcher.bestMove(board)
+        case notReachHere =>
+          println(s"notReachHere!!! $notReachHere")
+          searcher.bestMove(board)
       }
     } else {
       searcher.bestMove(board)

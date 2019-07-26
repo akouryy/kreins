@@ -19,7 +19,7 @@ final case class Board(fst: Panel, snd: Panel, private val _pass: Board = null) 
     countEmpty == 0 ||
       possPlaceable.code == 0 && pass.possPlaceable.code == 0
 
-  @inline def result =
+  lazy val result =
     if(isEnd) {
       val diff = countFst - countSnd
       if(diff > 0) FstWin(diff)
