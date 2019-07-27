@@ -2,12 +2,13 @@ package net.akouryy.kreins
 package strategy
 
 import game.{Board, LightBoard}
+import net.akouryy.kreins.util.ConsoleUtil.Ansi
 import util.{BitUtil, ExtInt}
 
 import scala.collection.mutable
 
 /**
-  * https://link.springer.com/content/pdf/10.1007%2F978-3-540-87608-3.pdf
+  * [1] https://link.springer.com/content/pdf/10.1007%2F978-3-540-87608-3.pdf
   * [2] https://ci.nii.ac.jp/naid/110002726401
   * https://www.chessprogramming.org/Proof-Number_Search
   * (https://blog.euphonictech.com/entry/2014/11/05/214050)
@@ -23,22 +24,37 @@ final class CheckmateSearch(isDrawOK: Boolean) {
 
   private[this] var memo: Array[mutable.Map[LightBoard, (Int, Int)]] = _
 
-  @inline private[this] def retrieve(n: Node) =
-    memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
-
-  @inline private[this] def store(n: Node, pr: Int, dpr: Int) {
-    memo(n.board.countEmpty)(n.board.toLightBoard) = (pr, dpr)
+  @inline private[this] def retrieve(n: Node) = {
+    if(n.board.countEmpty >= 2) {
+      nLoops += 1
+      memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
+    } else {
+      n.board.result1 match {
+        case Board.FstWin(_) =>
+          (0, MAX)
+        case Board.SndWin(_) =>
+          (MAX, 0)
+        case Board.Draw =>
+          if(isDrawOK == n.isOr /* XNOR */ ) (0, MAX) else (MAX, 0)
+        case Board.NotEnd =>
+          if(Kreins.isDebug) Console.err.println(Ansi.bRed("ERROR: NOT END"))
+          (1, 1)
+      }
+    }
   }
 
-  @inline private[this] def storeProven(n: Node) = {
-    n.thProof = 0
-    n.thDisproof = MAX
+  @inline private[this] def store(n: Node, pr: Int, dpr: Int) {
+    n.thProof = pr // [2] l.34
+    n.thDisproof = dpr
+    if(n.board.countEmpty >= 2)
+      memo(n.board.countEmpty)(n.board.toLightBoard) = (pr, dpr)
+  }
+
+  @inline private[this] def storeProven(n: Node) {
     store(n, 0, MAX)
   }
 
-  @inline private[this] def storeDisproven(n: Node) = {
-    n.thProof = MAX
-    n.thDisproof = 0
+  @inline private[this] def storeDisproven(n: Node) {
     store(n, MAX, 0)
   }
 
@@ -47,6 +63,8 @@ final class CheckmateSearch(isDrawOK: Boolean) {
 
     memo = Array.fill(initialBoard.countEmpty + 1)(mutable.Map[LightBoard, (Int, Int)]())
     nLoops = 0
+    countRACall = 0
+    couldResourcesBeAvailable = true
 
     val root = Node(initialBoard, isOr = true)
     root.thProof = MAX
@@ -84,13 +102,6 @@ final class CheckmateSearch(isDrawOK: Boolean) {
   }
 
   private[this] def dfWpn(n: Node) {
-    nLoops += 1
-    var (pr, dpr) = retrieve(n)
-    if(n.thProof <= pr || n.thDisproof <= dpr) {
-      n.thProof = pr
-      n.thDisproof = dpr
-      return
-    }
     n.board.result1 match {
       case Board.FstWin(_) =>
         storeProven(n)
@@ -102,52 +113,73 @@ final class CheckmateSearch(isDrawOK: Boolean) {
         generateMoves(n)
         // store(n, n.thProof, n.thDisproof) // unnecessary because there is no cycle
         var prC0 = 0
+
+        val retrieveMemo =
+          n.children.map(c => c -> retrieve(c)).toArray
         while(true) {
-          locally { // prMax, dprMin
-            var prCMax = 0
-            pr = MAX
-            var cnt = -1
-            for(c <- n.children) {
-              val (prC, dprC) = retrieve(c)
+          /* ***** prMax, dprMin; [1] ll.28-29, 67-85 ***** */
+          var prCMax = 0
+          var pr = MAX
+          var cnt = -1
+          locally {
+            var i = 0
+            val l = retrieveMemo.length
+            while(i < l) {
+              val (prC, dprC) = retrieveMemo(i)._2
               prCMax = prCMax max prC
               pr = pr min dprC
               if(prC != 0) cnt += 1
+              i += 1
             }
-            dpr = (prCMax + cnt.clampLow(0)).clampHigh(MAX)
           }
+          val dpr = (prCMax + cnt.clampLow(0)).clampHigh(MAX)
+
           if(n.thProof <= pr || n.thDisproof <= dpr || !resourcesAvailable()) {
-            n.thProof = pr // [2]
-            n.thDisproof = dpr // [2]
+            // n.thProof = pr // [2] // moved to store()
+            // n.thDisproof = dpr // [2] // moved to store()
             store(n, pr, dpr)
             return
           }
-          val (child, prC, dpr2) = select(n, prC0)
+          val (ci, prC, dprC, dpr2) = select(prC0, retrieveMemo)
           prC0 = prC
-          child.thProof = (n.thDisproof + prC - dpr).clamp(0, MAX)
-          child.thDisproof = (n.thProof min (dpr2 + 1)).clampHigh(MAX)
-          dfWpn(child)
+          val child = retrieveMemo(ci)._1
+          val prB = (n.thDisproof + prC - dpr).clamp(0, MAX)
+          val dprB = (n.thProof min (dpr2 + 1)).clampHigh(MAX)
+          if(prB <= prC || dprB <= dprC) { // [1]: ll 9-11
+            child.thProof = prC
+            child.thDisproof = dprC
+          } else {
+            child.thProof = prB
+            child.thDisproof = dprB
+            dfWpn(child)
+            retrieveMemo(ci) = (child, (child.thProof, child.thDisproof))
+          }
         }
     }
   }
 
-  @inline private[this] def select(n: Node, prC0: Int): (Node, Int, Int) = {
+  @inline private[this] def select(
+    prC0: Int, retrieveMemo: Seq[(Node, (Int, Int))]
+  ): (Int, Int, Int, Int) = {
     var prC = prC0
     var dprC, dpr2 = MAX
-    var best: Node = null
+    var bestI = 0
 
-    for(c <- n.children) {
-      val (pr, dpr) = retrieve(c)
+    var i = 0
+    while(i < retrieveMemo.length) {
+      val (pr, dpr) = retrieveMemo(i)._2
       if(dpr < dprC) {
-        best = c
+        bestI = i
         prC = pr
         dpr2 = dprC
         dprC = dpr
       } else if(dpr < dpr2) {
         dpr2 = dpr
       }
-      if(pr == MAX) return (best, prC, dpr2)
+      if(pr == MAX) return (bestI, prC, dprC, dpr2)
+      i += 1
     }
-    (best, prC, dpr2)
+    (bestI, prC, dprC, dpr2)
   }
 
   @inline private[this] def generateMoves(n: Node) {
@@ -168,8 +200,18 @@ final class CheckmateSearch(isDrawOK: Boolean) {
     }
   }
 
-  @inline private[this] def resourcesAvailable() =
-    System.currentTimeMillis < endTimeMS
+  private[this] var couldResourcesBeAvailable = true
+
+  private[this] var countRACall = 0
+
+  @inline private[this] def resourcesAvailable() = {
+    countRACall += 1
+
+    couldResourcesBeAvailable =
+      couldResourcesBeAvailable &&
+        ((countRACall & 1023) != 1023 || System.currentTimeMillis < endTimeMS)
+    couldResourcesBeAvailable
+  }
 
   var nNodes = 0
 

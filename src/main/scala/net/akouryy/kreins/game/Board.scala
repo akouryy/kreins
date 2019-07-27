@@ -37,7 +37,7 @@ final class Board(
     countEmpty == 1 ||
       possPlaceable.code == 0 && pass.possPlaceable.code == 0
 
-  @inline def result1 =
+  @inline lazy val result1 =
     if(isEnd) {
       result
     } else if(countEmpty == 1) {
