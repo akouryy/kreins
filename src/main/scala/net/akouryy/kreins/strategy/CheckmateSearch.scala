@@ -1,7 +1,7 @@
 package net.akouryy.kreins
 package strategy
 
-import game.Board
+import game.{Board, LightBoard}
 import util.{BitUtil, ExtInt}
 
 import scala.collection.mutable
@@ -21,13 +21,13 @@ final class CheckmateSearch(isDrawOK: Boolean) {
 
   private[this] var endTimeMS = System.currentTimeMillis
 
-  private[this] var memo: Array[mutable.Map[Board, (Int, Int)]] = _
+  private[this] var memo: Array[mutable.Map[LightBoard, (Int, Int)]] = _
 
   @inline private[this] def retrieve(n: Node) =
-    memo(n.board.countEmpty).getOrElse(n.board, (1, 1))
+    memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
 
   @inline private[this] def store(n: Node, pr: Int, dpr: Int) {
-    memo(n.board.countEmpty)(n.board) = (pr, dpr)
+    memo(n.board.countEmpty)(n.board.toLightBoard) = (pr, dpr)
   }
 
   @inline private[this] def storeProven(n: Node) = {
@@ -45,7 +45,7 @@ final class CheckmateSearch(isDrawOK: Boolean) {
   def run(initialBoard: Board, maxTimeMS: Long): (RunResult, Int) = {
     endTimeMS = System.currentTimeMillis + maxTimeMS
 
-    memo = Array.fill(initialBoard.countEmpty + 1)(mutable.Map[Board, (Int, Int)]())
+    memo = Array.fill(initialBoard.countEmpty + 1)(mutable.Map[LightBoard, (Int, Int)]())
     nLoops = 0
 
     val root = Node(initialBoard, isOr = true)

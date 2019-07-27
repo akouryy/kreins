@@ -165,12 +165,6 @@ final class Board(
     case _ => false
   }
 
-  @inline override def hashCode = {
-    val f = fst.code
-    val s = snd.code
-    ((f.toInt * 31 + (f >>> 32).toInt) * 31 + s.toInt) * 31 + (s >>> 32).toInt
-  }
-
   override def toString = toString(-1)
 
   def toString(newPos: Int) = {
@@ -196,6 +190,8 @@ final class Board(
       }.mkString("\n") +
       s"\n$bGreen  1 2 3 4 5 6 7 8   $bDefault"
   }
+
+  def toLightBoard = new LightBoard(fst.code, snd.code)
 }
 
 object Board {
