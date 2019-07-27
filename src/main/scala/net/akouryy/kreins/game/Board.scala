@@ -185,7 +185,7 @@ final class Board(
     val bYellow = "\u001b[43m"
 
     s"Board($countFst-$countSnd-($countEmpty), ${fst.code}, ${snd.code}):\n" +
-      s"$bGreen  1 2 3 4 5 6 7 8   $bDefault\n" +
+      s"$bGreen  1 2 3 4 5 6 7 8   $bBlack  \n" +
       fm.zip(sm).zipWithIndex.map { case ((fr, sr), i) =>
         bGreen + "ABCDEFGH" (i) + " " +
           (fr zip sr).zipWithIndex.map { case ((f, s), j) =>
