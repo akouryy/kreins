@@ -17,11 +17,11 @@ object EdgeScorer extends Scorer {
       else
         30 - (3 + -1 + -1 + 3)
     } else if(edge == 0x7e) { // mountain
-      40 - (-16 + 3 + -1 + -1 + 3 + -16)
+      40 - (-46 + 3 + -1 + -1 + 3 + -46)
     } else if(edge == 0x3e) { // right wing
-      -40 - (3 + -1 + -1 + 3 + -16)
+      -40 - (3 + -1 + -1 + 3 + -46)
     } else if(edge == 0x7c) { // left wing
-      -40 - (-16 + 3 + -1 + -1 + 3)
+      -40 - (-46 + 3 + -1 + -1 + 3)
     } else {
       0
     }

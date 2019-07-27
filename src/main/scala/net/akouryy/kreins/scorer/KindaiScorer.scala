@@ -9,7 +9,7 @@ import util.InputUtil
   */
 final class KindaiScorer(val wbp: Int, val wcn: Int, val wfs: Int) extends Scorer {
   def score(board: Board) = {
-    (CellScorer.score(board) + EdgeScorer.score(board)) * wbp +
+    CellScorer.score(board) * wbp +
       (board.possPlaceable.popcount - board.pass.possPlaceable.popcount) * wcn +
       (board.fst.fixedRectangleCount - board.snd.fixedRectangleCount) * wfs
   }

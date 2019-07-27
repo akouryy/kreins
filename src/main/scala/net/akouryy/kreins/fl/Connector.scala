@@ -16,8 +16,8 @@ case class Connector(host: String, port: Int) {
       Loan(new BufferedReader(new InputStreamReader(sc.getInputStream))) { reader =>
         Loan(new PrintWriter(sc.getOutputStream, true)) { writer =>
           val output = (s: String) => {
-            println(s"sending: '$s'")
             writer.println(s)
+            println(s"sent: '$s'")
           }
           init(output)
           var l = ""
