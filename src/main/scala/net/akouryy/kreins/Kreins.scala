@@ -8,11 +8,13 @@ import util.InputUtil
 
 object Kreins {
 
+  val VERSION = "0.4.0"
+
   final case class CmdConfig(
     host: String = "localhost",
     isDebug: Boolean = false,
     port: Int = 8000,
-    playerName: String = "kreins",
+    playerName: String = s"kreins-$VERSION",
     dysGzFile: String = ""
   )
 
@@ -23,7 +25,7 @@ object Kreins {
     import builder._
     OParser.sequence(
       programName("kreins"),
-      head("kreins", "0.1"),
+      head("kreins", VERSION),
       opt[String]('H', "host")
         .action((x, c) => c.copy(host = x))
         .text("[required] host name"),

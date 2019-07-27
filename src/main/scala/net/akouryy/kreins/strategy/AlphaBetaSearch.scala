@@ -24,7 +24,7 @@ final class AlphaBetaSearch(val scorer: Scorer, val depth: Int) {
   def bestScore(board: Board, level: Int, alpha0: Int, beta: Int): Int = {
     // assert(alpha0 < beta)
     if(level == depth) {
-      (scorer.score(board) * (0.8 + 0.1 * scala.util.Random.nextInt(5))).toInt
+      scorer.score(board)
       // assert(.abs < 10000000)
     } else {
       var pp = board.possPlaceable.code
