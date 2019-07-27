@@ -2,16 +2,16 @@ package net.akouryy.kreins
 package scorer
 
 import game.Board
-import net.akouryy.kreins.util.InputUtil
+import util.InputUtil
 
 /**
   * https://www.info.kindai.ac.jp/~takasi-i/thesis/2012_09-1-037-0133_S_Shiota_thesis.pdf
   */
-class KindaiScorer(val wbp: Int, val wcn: Int, val wfs: Int) extends Scorer {
+final class KindaiScorer(val wbp: Int, val wcn: Int, val wfs: Int) extends Scorer {
   def score(board: Board) = {
-    CellScorer.score(board) * wbp + board.possPlaceable.popcount * wcn
-    /* +
-      (board.fst.fixedRectangleCount - board.snd.fixedRectangleCount) * wfs */
+    CellScorer.score(board) * wbp +
+      (board.possPlaceable.popcount - board.pass.possPlaceable.popcount) * wcn +
+      (board.fst.fixedRectangleCount - board.snd.fixedRectangleCount) * wfs
   }
 }
 
