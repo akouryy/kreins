@@ -66,4 +66,40 @@ class PanelSpec extends FlatSpec with DiagrammedAssertions {
   "rotate45ACW" should "反時計回りに45度回転させて詰め込んだ盤面を返す" in {
     testPanel(_.rotate45ACW, (m, i, j) => m(i + j & 7)(j))
   }
+
+  "fixedRectangleCount" should "確定石の数を数える" in {
+    val er = Seq(0, 0, 0, 0, 0, 0, 0, 0)
+    val pfs = Seq(
+      Seq(er, er, er, er, er, er, er, er) -> 0,
+      Seq(
+        Seq(1, 1, 1, 0, 0, 0, 0, 0),
+        Seq(1, 1, 0, 0, 0, 0, 0, 0),
+        Seq(1, 0, 0, 0, 0, 0, 0, 0),
+        er, er, er, er, er
+      ) -> 6,
+      Seq(
+        Seq(1, 1, 1, 1, 1, 1, 1, 1),
+        Seq(1, 1, 0, 0, 0, 0, 1, 1),
+        Seq(1, 0, 0, 0, 0, 0, 0, 1),
+        er, er, er, er, er
+      ) -> 14,
+      Seq(
+        Seq(1, 0, 1, 0, 0, 0, 0, 0),
+        Seq(1, 1, 0, 0, 0, 0, 0, 0),
+        Seq(1, 0, 0, 0, 0, 0, 0, 0),
+        er, er, er, er, er
+      ) -> 3,
+      Seq(
+        Seq(1, 0, 1, 1, 1, 1, 1, 1),
+        Seq(1, 1, 1, 0, 1, 1, 1, 1),
+        Seq(1, 0, 0, 0, 0, 0, 0, 0),
+        er, er, er, er, er
+      ) -> 13
+    )
+
+    for((matI, frc) <- pfs) {
+      val mat = matI.map(_.map(_ == 1))
+      assert(Panel.fromMatrix(mat).fixedRectangleCount === frc)
+    }
+  }
 }
