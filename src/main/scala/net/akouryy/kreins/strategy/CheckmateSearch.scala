@@ -2,7 +2,7 @@ package net.akouryy.kreins
 package strategy
 
 import game.{Board, LightBoard}
-import net.akouryy.kreins.util.ConsoleUtil.Ansi
+//import net.akouryy.kreins.util.ConsoleUtil.Ansi
 import util.{BitUtil, ExtInt}
 
 import scala.collection.mutable
@@ -25,10 +25,10 @@ final class CheckmateSearch(isDrawOK: Boolean) {
   private[this] var memo: Array[mutable.Map[LightBoard, (Int, Int)]] = _
 
   @inline private[this] def retrieve(n: Node) = {
-    if(n.board.countEmpty >= 2) {
-      nLoops += 1
-      memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
-    } else {
+    // if(n.board.countEmpty >= 2) {
+    nLoops += 1
+    memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
+    /*} else {
       n.board.result1 match {
         case Board.FstWin(_) =>
           (0, MAX)
@@ -40,14 +40,14 @@ final class CheckmateSearch(isDrawOK: Boolean) {
           if(Kreins.isDebug) Console.err.println(Ansi.bRed("ERROR: NOT END"))
           (1, 1)
       }
-    }
+    }*/
   }
 
   @inline private[this] def store(n: Node, pr: Int, dpr: Int) {
     n.thProof = pr // [2] l.34
     n.thDisproof = dpr
-    if(n.board.countEmpty >= 2)
-      memo(n.board.countEmpty)(n.board.toLightBoard) = (pr, dpr)
+    // if(n.board.countEmpty >= 2)
+    memo(n.board.countEmpty)(n.board.toLightBoard) = (pr, dpr)
   }
 
   @inline private[this] def storeProven(n: Node) {
