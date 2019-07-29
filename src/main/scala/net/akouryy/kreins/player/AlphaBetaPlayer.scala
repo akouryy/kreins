@@ -14,7 +14,7 @@ import util.InputUtil
 final class AlphaBetaPlayer(
   val scorer: Scorer,
   val depth: Int,
-  val dys: Map[Board, List[(Byte, Int)]]
+  val dys: PlacementTableEncoder.PlacementTable
 ) extends Player {
   var absolutelyWin = false
 
@@ -30,9 +30,9 @@ final class AlphaBetaPlayer(
   def think(board: Board, resign: Boolean, time: Int): Int = {
     import CheckmateSearch._
 
-    for(m <- dysSearch.bestMove(board)) return m
-
     val rest = board.countEmpty
+
+    if(rest >= 30) for(m <- dysSearch.bestMove(board)) return m
 
     val searcher = new AlphaBetaSearch(scorer,
       if(time < 20000) 3

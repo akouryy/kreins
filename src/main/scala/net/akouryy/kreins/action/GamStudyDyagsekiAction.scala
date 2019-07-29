@@ -4,7 +4,7 @@ import java.io.FileOutputStream
 import java.util.zip.GZIPOutputStream
 
 import net.akouryy.kreins.encoder.PlacementTableEncoder
-import net.akouryy.kreins.game.Board
+import net.akouryy.kreins.game.{LightBoard}
 import net.akouryy.kreins.study.parser.GamParser
 import net.akouryy.kreins.util.{InputUtil, Loan}
 
@@ -17,7 +17,7 @@ object GamStudyDyagsekiAction {
     val wgtFileName = InputUtil.readLineWithRetry("dys.gz file name: ").trim
 
     val placements =
-      mutable.Map[Board, mutable.Map[Byte, Int]]()
+      mutable.Map[LightBoard, mutable.Map[Byte, Int]]()
 
     Loan(Source.fromFile(gamFileName)) { sc =>
       sc.getLines.foreach { l =>
@@ -26,7 +26,7 @@ object GamStudyDyagsekiAction {
           case Right(lg) =>
             for((b, Some(p)) <- lg.seq.take(30)) {
               val ps =
-                placements.getOrElseUpdate(b, mutable.Map[Byte, Int]())
+                placements.getOrElseUpdate(b.toLightBoard, mutable.Map[Byte, Int]())
               ps(p.toByte) = ps.getOrElse(p.toByte, 0) + 1
             }
         }
@@ -36,7 +36,7 @@ object GamStudyDyagsekiAction {
     val pt = placements.mapValues { ps =>
       val l = ps.toList
       val max = l.map(_._2).max
-      l.map { case (p, n) => (p, n * 255 / max) }
+      l.map { case (p, n) => (p, (n * 255 / max).toShort) }
     }.toMap /* convert to immutable Map */
 
     Loan(new GZIPOutputStream(new FileOutputStream(wgtFileName))) { o =>
