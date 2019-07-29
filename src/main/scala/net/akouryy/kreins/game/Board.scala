@@ -160,6 +160,9 @@ final class Board(
     Board(snd & ~flipped.code, fst | flipped | (1L << stone), null, countEmpty - 1)
   }
 
+  @inline def unfixedBoard =
+    new LightBoard(fst.code & ~fst.fixedRectangleCode, snd.code & ~snd.fixedRectangleCode)
+
   @inline override def equals(that: Any) = that match {
     case b: Board => fst == b.fst && snd == b.snd
     case _ => false

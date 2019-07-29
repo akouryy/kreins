@@ -35,8 +35,8 @@ final class AlphaBetaPlayer(
     val rest = board.countEmpty
 
     val searcher = new AlphaBetaSearch(scorer,
-      if(time < 10000) 3
-      else if(time < 30000 || rest >= 52) 5
+      if(time < 20000) 3
+      else if(time < 40000) 5
       else 7
     )
 

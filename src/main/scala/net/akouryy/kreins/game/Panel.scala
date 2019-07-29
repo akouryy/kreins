@@ -81,7 +81,7 @@ final case class Panel(code: Long) extends AnyVal {
     Panel(d)
   }
 
-  @inline def fixedRectangleCount = {
+  @inline def fixedRectangleCode = {
     var x = 0L
     val a = code
     locally {
@@ -118,8 +118,10 @@ final case class Panel(code: Long) extends AnyVal {
         x |= g
       }
     }
-    BitUtil.popcount(x)
+    x
   }
+
+  @inline def fixedRectangleCount = BitUtil.popcount(fixedRectangleCode)
 
   override def toString = {
     s"Panel($code):\n+---------------+\n" +
