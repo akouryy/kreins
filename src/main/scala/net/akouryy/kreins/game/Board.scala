@@ -168,6 +168,11 @@ final class Board(
     case _ => false
   }
 
+  @inline override def hashCode = {
+    ((fst.code.toInt * 31 + (fst.code >>> 32).toInt) * 31 +
+      snd.code.toInt) * 31 + (snd.code >>> 32).toInt
+  }
+
   override def toString = toString(-1)
 
   def toString(newPos: Int) = {
