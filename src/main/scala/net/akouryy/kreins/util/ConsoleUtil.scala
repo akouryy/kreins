@@ -12,14 +12,17 @@ object ConsoleUtil {
     val bOrangeStart = s"\u001b[48;5;220m$fBlackStart"
     val fOrangeStart = s"\u001b[38;5;220m$bBlackStart"
     val bRedStart = s"\u001b[48;5;124m$fWhiteStart"
+    val fRedStart = s"\u001b[38;5;124m$bBlackStart"
     val bSkyStart = s"\u001b[48;5;51m$fBlackStart"
     val fSkyStart = s"\u001b[38;5;51m$bBlackStart"
 
     def bOrange(s: String) = bOrangeStart + s + reset
 
+    def fOrange(s: String) = fOrangeStart + s + reset
+
     def bRed(s: String) = bRedStart + s + reset
 
-    def fOrange(s: String) = fOrangeStart + s + reset
+    def fRed(s: String) = fRedStart + s + reset
 
     def bSky(s: String) = bSkyStart + s + reset
 

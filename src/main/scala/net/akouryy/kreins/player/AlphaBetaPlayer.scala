@@ -11,7 +11,7 @@ import util.BitUtil
 final class AlphaBetaPlayer(
   val scorer: Scorer,
   val depth: Int,
-  val dys: PlacementTableEncoder.PlacementTable
+  val dys: PlacementTableEncoder.CompactPTable
 ) extends Player {
   var absolutelyWin = false
 
@@ -35,7 +35,7 @@ final class AlphaBetaPlayer(
       return -1
     }
 
-    if(rest >= 30) for(m <- dysSearch.bestMove(board)) return m
+    if(rest >= 60 - DyagsekiSearch.MaxTurn) for(m <- dysSearch.bestMove(board)) return m
 
     val pp = board.possPlaceable.code
     val ppc = BitUtil.popcount(pp)

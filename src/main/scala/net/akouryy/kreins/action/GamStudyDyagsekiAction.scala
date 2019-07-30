@@ -1,18 +1,20 @@
-package net.akouryy.kreins.action
+package net.akouryy.kreins
+package action
 
 import java.io.FileOutputStream
 import java.util.zip.GZIPOutputStream
 
-import net.akouryy.kreins.encoder.PlacementTableEncoder
-import net.akouryy.kreins.game.{LightBoard}
-import net.akouryy.kreins.study.parser.GamParser
-import net.akouryy.kreins.util.{InputUtil, Loan}
+import encoder.PlacementTableEncoder
+import game.LightBoard
+import strategy.DyagsekiSearch
+import study.parser.GamParser
+import util.{InputUtil, Loan}
 
 import scala.collection.mutable
 import scala.io.Source
 
 object GamStudyDyagsekiAction {
-  def _main(args: Array[String]) {
+  def run() {
     val gamFileName = InputUtil.readLineWithRetry("gam file name: ").trim
     val wgtFileName = InputUtil.readLineWithRetry("dys.gz file name: ").trim
 
@@ -24,7 +26,7 @@ object GamStudyDyagsekiAction {
         GamParser.parse(l) match {
           case Left(s) => println(s)
           case Right(lg) =>
-            for((b, Some(p)) <- lg.seq.take(30)) {
+            for((b, Some(p)) <- lg.seq.take(DyagsekiSearch.MaxTurn)) {
               val ps =
                 placements.getOrElseUpdate(b.toLightBoard, mutable.Map[Byte, Int]())
               ps(p.toByte) = ps.getOrElse(p.toByte, 0) + 1

@@ -7,7 +7,9 @@ import util.ConsoleUtil.Ansi
 
 import scala.util.Random
 
-class DyagsekiSearch(val pt: PlacementTableEncoder.PlacementTable) {
+class DyagsekiSearch(pt: PlacementTableEncoder.CompactPTable) {
+  val (pt1, pt2) = pt
+
   def bestMove(board: Board): Option[Int] = {
     val pp = board.possPlaceable.code
 
@@ -22,13 +24,20 @@ class DyagsekiSearch(val pt: PlacementTableEncoder.PlacementTable) {
           (board.mirrorWithDiagRightDown.toLightBoard, Pos.mirrorWithDiagRightDown)
         )
       ) {
-        for(ls <- pt.get(b)) {
+        for(pos <- pt2.get(b)) {
+          if(Kreins.isDebug) println(Ansi.bSky(s"dys: only ${pFn(pos)}"))
+          return Some(pFn(pos).toInt)
+        }
+
+        for(ls <- pt1.get(b)) {
           var rand = Random.nextInt(ls.map(_._2.toInt).sum)
           for((p0, _) <- ls.find { case (_, n) =>
             rand -= n
             rand <= 0
           }) {
-            if(Kreins.isDebug) println(Ansi.bSky(s"dys: $ls"))
+            if(Kreins.isDebug) {
+              println(Ansi.bSky(s"dys: ${ls.map { case (p, s) => (pFn(p), s) }}"))
+            }
             return Some(pFn(p0).toInt)
           }
           if(Kreins.isDebug) println(Ansi.bRed(s"BUG: dys returns None for $ls"))
@@ -39,3 +48,7 @@ class DyagsekiSearch(val pt: PlacementTableEncoder.PlacementTable) {
   }
 }
 
+object DyagsekiSearch {
+  val MaxTurnRandom = 20
+  val MaxTurn = 40
+}

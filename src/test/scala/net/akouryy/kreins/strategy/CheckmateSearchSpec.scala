@@ -35,7 +35,7 @@ class CheckmateSearchSpec extends FlatSpec with DiagrammedAssertions {
       val t0 = System.nanoTime()
       val result = {
         import CheckmateSearch._
-        ars.run(b, 1000)._1 match {
+        ars.run(b, 10000)._1 match {
           case WillWin => true
           case WillLose => false
           case Timeout => throw new RuntimeException("timeout")

@@ -1,5 +1,6 @@
 package net.akouryy.kreins.game
 
+import net.akouryy.kreins.util.BitUtil
 import org.scalatest._
 
 import scala.util.Random
@@ -101,5 +102,40 @@ class PanelSpec extends FlatSpec with DiagrammedAssertions {
       val mat = matI.map(_.map(_ == 1))
       assert(Panel.fromMatrix(mat).fixedRectangleCount === frc)
     }
+  }
+
+  "aaa" should "bbb" in {
+    var a = 0
+    var i = 0
+    val c0 = System.currentTimeMillis
+    while(i < 10000000) {
+      var pp = Random.nextLong
+      while(pp != 0) {
+        val j = BitUtil.firstHighBitPos(pp)
+        a += j
+        pp &= ~(1L << j)
+      }
+      i += 1
+    }
+    println(System.currentTimeMillis - c0)
+    println(a)
+
+    a = 0
+    i = 0
+    val c1 = System.currentTimeMillis
+    while(i < 10000000) {
+      var pp = Random.nextLong
+      var j = 0
+      while(pp != 0) {
+        if(((pp >> j) & 1) == 1) {
+          a += j
+          pp &= ~(1L << j)
+        }
+        j += 1
+      }
+      i += 1
+    }
+    println(System.currentTimeMillis - c1)
+    println(a)
   }
 }
