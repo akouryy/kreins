@@ -1,15 +1,12 @@
 package net.akouryy.kreins
 package player
 
-import java.io.FileInputStream
-import java.util.zip.GZIPInputStream
-
 import encoder.PlacementTableEncoder
 import game.Board
 import scorer.Scorer
 import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
 import util.ConsoleUtil.Ansi
-import util.{BitUtil, InputUtil}
+import util.BitUtil
 
 final class AlphaBetaPlayer(
   val scorer: Scorer,
@@ -85,43 +82,4 @@ final class AlphaBetaPlayer(
       searcher.bestMove(board)
     }
   }
-}
-
-object AlphaBetaPlayer {
-
-  object WithCellScore extends PlayerGenerator[AlphaBetaPlayer] {
-    def fromStdin() = {
-      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
-      val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
-      new AlphaBetaPlayer(scorer.CellScorer, depth, PlacementTableEncoder.decode(
-        new GZIPInputStream(new FileInputStream(dysFile))
-      ))
-    }
-
-    val nickname = "AlphaBetaPlayer/CellScore"
-  }
-
-  object WithKindaiScore extends PlayerGenerator[AlphaBetaPlayer] {
-    def fromStdin() = {
-      val scr = scorer.KindaiScorer.fromStdin()
-      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
-      val dysFile = InputUtil.readLineWithRetry("dys.gz file: ")
-      new AlphaBetaPlayer(scr, depth, PlacementTableEncoder.decode(
-        new GZIPInputStream(new FileInputStream(dysFile))
-      ))
-    }
-
-    val nickname = "AlphaBetaPlayer/KindaiScore"
-  }
-
-  /*object WithPatternScore extends PlayerGenerator[AlphaBetaPlayer] {
-    def fromStdin() = {
-      val scr = scorer.PatternScorer.fromStdin()
-      val depth = InputUtil.readInt("full search depth(3): ").getOrElse(3)
-      new AlphaBetaPlayer(scr, depth)
-    }
-
-    val nickname = "AlphaBetaPlayer/PatternScore"
-  }*/
-
 }
