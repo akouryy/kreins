@@ -18,10 +18,10 @@ class DyagsekiSearch(pt: PlacementTableEncoder.CompactPTable) {
     } else {
       for(
         (b, pFn) <- Seq[(LightBoard, Byte => Byte)](
-          (board.toLightBoard, p => p),
-          (board.mirrorWithVertical.mirrorWithHorizontal.toLightBoard, Pos.rotate180),
           (board.mirrorWithDiagRightUp.toLightBoard, Pos.mirrorWithDiagRightUp),
-          (board.mirrorWithDiagRightDown.toLightBoard, Pos.mirrorWithDiagRightDown)
+          (board.mirrorWithDiagRightDown.toLightBoard, Pos.mirrorWithDiagRightDown),
+          (board.toLightBoard, p => p),
+          (board.mirrorWithVertical.mirrorWithHorizontal.toLightBoard, Pos.rotate180)
         )
       ) {
         for(pos <- pt2.get(b)) {

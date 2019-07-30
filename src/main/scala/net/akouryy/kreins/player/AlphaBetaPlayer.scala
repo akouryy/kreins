@@ -10,7 +10,6 @@ import util.BitUtil
 
 final class AlphaBetaPlayer(
   val scorer: Scorer,
-  val depth: Int,
   val dys: PlacementTableEncoder.CompactPTable
 ) extends Player {
   var absolutelyWin = false
@@ -28,21 +27,21 @@ final class AlphaBetaPlayer(
     if(timeMS < 20000) {
       new NegaScoutSearch(scorer, 3).bestMove(board, -1)
     } else {
+      val depth =
+        if(timeMS < 50000 || rest >= 30) 7
+        else 8
+
+      val dur =
+        if(timeMS < 50000 && rest >= 40) 1000L
+        else if(timeMS < 40000) 2000L
+        else if(rest >= 30) 3000L
+        else 5000L
+
       try {
-        val depth =
-          if(timeMS < 50000 || rest >= 30) 7
-          else 9
-
-        val dur =
-          if(timeMS < 50000 && rest >= 40) 1000
-          else if(timeMS < 40000) 2000
-          else if(rest >= 30) 3000
-          else 4000
-
         new NegaScoutSearch(scorer, depth).bestMove(board, dur)
       } catch {
         case NegaScoutSearch.TimeoutError =>
-          if(Kreins.isDebug) println(Ansi.bRed("NegaScout(7) timeout"))
+          if(Kreins.isDebug) println(Ansi.bRed(s"NegaScout($depth, $dur) timeout"))
           new NegaScoutSearch(scorer, 3).bestMove(board, -1)
       }
     }
