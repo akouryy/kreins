@@ -91,8 +91,8 @@ object Kreins {
         val g = if(aliceFirst) Game(alice, bob) else Game(bob, alice)
         g.run(allowResign)
         (g.blackBoard.result, g.resignedBy) match {
-          case (FstWin(_), _) | (_, Some(false)) => if(aliceFirst) afWin += 1 else bfWin += 1
-          case (SndWin(_), _) | (_, Some(true)) => if(aliceFirst) bsWin += 1 else asWin += 1
+          case (FstWin, _) | (_, Some(false)) => if(aliceFirst) afWin += 1 else bfWin += 1
+          case (SndWin, _) | (_, Some(true)) => if(aliceFirst) bsWin += 1 else asWin += 1
           case (Draw, _) => draw += 1
           case (NotEnd, _) =>
             throw new RuntimeException(s"game not end\n${g.blackBoard}")

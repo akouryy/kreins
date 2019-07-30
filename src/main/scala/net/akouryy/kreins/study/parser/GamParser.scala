@@ -22,9 +22,9 @@ object GamParser {
 
       val diff = ls(1).toInt
       val result =
-        if(diff > 0) Board.FstWin(diff)
+        if(diff > 0) Board.FstWin
         else if(diff == 0) Board.Draw
-        else Board.SndWin(-diff)
+        else Board.SndWin
 
       if(log.finalResult != result) {
         return Left(

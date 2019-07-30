@@ -28,9 +28,9 @@ class PatternWeight(val fromStone: Int, val untilStone: Int) {
       ) {
         val p = patterns(i).code(b)
         (if(f == (h % 2 == 0)) l.finalResult else ~l.finalResult) match {
-          case Board.FstWin(_) =>
+          case Board.FstWin =>
             blacks(i)(p) += 2
-          case Board.SndWin(_) =>
+          case Board.SndWin =>
             whites(i)(p) += 2
           case Board.Draw =>
             blacks(i)(p) += 1

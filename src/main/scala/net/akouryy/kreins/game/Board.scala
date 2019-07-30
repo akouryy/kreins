@@ -26,9 +26,9 @@ final class Board(
   lazy val result =
     if(isEnd) {
       val diff = countFst - countSnd
-      if(diff > 0) FstWin(diff)
+      if(diff > 0) FstWin
       else if(diff == 0) Draw
-      else SndWin(-diff)
+      else SndWin
     } else {
       NotEnd
     }
@@ -235,12 +235,12 @@ object Board {
     def unary_~ : BoardResult
   }
 
-  final case class FstWin(diff: Int) extends BoardResult {
-    def unary_~ = SndWin(diff)
+  case object FstWin extends BoardResult {
+    def unary_~ = SndWin
   }
 
-  final case class SndWin(diff: Int) extends BoardResult {
-    def unary_~ = FstWin(diff)
+  case object SndWin extends BoardResult {
+    def unary_~ = FstWin
   }
 
   case object Draw extends BoardResult {

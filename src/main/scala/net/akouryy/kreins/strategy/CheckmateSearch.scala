@@ -30,9 +30,9 @@ final class CheckmateSearch(isDrawOK: Boolean) {
     memo(n.board.countEmpty).getOrElse(n.board.toLightBoard, (1, 1))
     /*} else {
       n.board.result1 match {
-        case Board.FstWin(_) =>
+        case Board.FstWin =>
           (0, MAX)
-        case Board.SndWin(_) =>
+        case Board.SndWin =>
           (MAX, 0)
         case Board.Draw =>
           if(isDrawOK == n.isOr /* XNOR */ ) (0, MAX) else (MAX, 0)
@@ -103,9 +103,9 @@ final class CheckmateSearch(isDrawOK: Boolean) {
 
   private[this] def dfWpn(n: Node) {
     n.board.result1 match {
-      case Board.FstWin(_) =>
+      case Board.FstWin =>
         storeProven(n)
-      case Board.SndWin(_) =>
+      case Board.SndWin =>
         storeDisproven(n)
       case Board.Draw =>
         if(isDrawOK == n.isOr /* XNOR */ ) storeProven(n) else storeDisproven(n)
