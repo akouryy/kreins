@@ -4,7 +4,7 @@ package player
 import encoder.PlacementTableEncoder
 import game.Board
 import scorer.Scorer
-import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
+import strategy.{CheckmateSearch, DyagsekiSearch, NegaScoutSearch}
 import util.ConsoleUtil.Ansi
 import util.BitUtil
 
@@ -22,6 +22,30 @@ final class AlphaBetaPlayer(
   override def reset() = {
     absolutelyWin = false
     cmSearch = new CheckmateSearch(isDrawOK = false)
+  }
+
+  def nsSearch(board: Board, timeMS: Int, rest: Int) = {
+    if(timeMS < 20000) {
+      new NegaScoutSearch(scorer, 3).bestMove(board, -1)
+    } else {
+      try {
+        val depth =
+          if(timeMS < 50000 || rest >= 30) 7
+          else 9
+
+        val dur =
+          if(timeMS < 50000 && rest >= 40) 1000
+          else if(timeMS < 40000) 2000
+          else if(rest >= 30) 3000
+          else 4000
+
+        new NegaScoutSearch(scorer, depth).bestMove(board, dur)
+      } catch {
+        case NegaScoutSearch.TimeoutError =>
+          if(Kreins.isDebug) println(Ansi.bRed("NegaScout(7) timeout"))
+          new NegaScoutSearch(scorer, 3).bestMove(board, -1)
+      }
+    }
   }
 
   def think(board: Board, resign: Boolean, time: Int): Int = {
@@ -44,12 +68,6 @@ final class AlphaBetaPlayer(
     if(ppc == 1) {
       return (0 to 63).find(i => (pp >> i & 1) == 1).get
     }
-
-    val searcher = new AlphaBetaSearch(scorer,
-      if(time < 20000) 3
-      else if(time < 40000) 5
-      else 7
-    )
 
     if(rest <= 25 || absolutelyWin) {
       val maxTimeMS =
@@ -74,12 +92,12 @@ final class AlphaBetaPlayer(
       }
       absolutelyWin = result == WillWin
       if(result == Timeout) {
-        searcher.bestMove(board)
+        nsSearch(board, time, rest)
       } else {
         stone
       }
     } else {
-      searcher.bestMove(board)
+      nsSearch(board, time, rest)
     }
   }
 }
