@@ -3,10 +3,11 @@ package fl
 
 import java.io.FileInputStream
 import java.util.zip.GZIPInputStream
+import scala.collection.mutable.{IndexedSeq => MutIndexedSeq}
 
 import game.Board
-import net.akouryy.kreins.encoder.PlacementTableEncoder
-import net.akouryy.kreins.util.ConsoleUtil.Ansi
+import encoder.PlacementTableEncoder
+import util.ConsoleUtil.Ansi
 import player.AlphaBetaPlayer
 import scorer.KindaiScorer
 
@@ -30,7 +31,7 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
         zys
       )
 
-    var stats = initStats
+    var stats = if(Kreins.isDebug) initStats else null
 
     var state: GameState = Waiting
     var amIBlack = false
@@ -80,6 +81,7 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
                 else
                   stats = stats.copy(wLose = stats.wLose + 1)
             }
+            println(stats.toLongString)
           }
           state = Waiting
           player.reset()
@@ -103,6 +105,8 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
           val Playing(lastPos, board, _) = state
           state = Playing(lastPos, board, timeMS)
           if(Kreins.isDebug) {
+            stats.ackSum(60 - board.countEmpty) += timeMS
+            stats.ackCnt(60 - board.countEmpty) += 1
             println(stats)
             println(state)
           }
@@ -129,19 +133,40 @@ object Client {
     bLose: Int,
     wWin: Int,
     wDraw: Int,
-    wLose: Int
+    wLose: Int,
+    ackSum: MutIndexedSeq[Int],
+    ackCnt: MutIndexedSeq[Int]
   ) {
     val win = bWin + wWin
     val draw = bDraw + wDraw
     val lose = bLose + wLose
+    val games = win + draw + lose
+    val bGames = bWin + bDraw + bLose
+    val wGames = wWin + wDraw + wLose
 
     override def toString =
       Ansi.fSky(
-        f"""WIN  : me $win%03d-($draw%03d)-$lose%03d op
-           |BLACK: me $bWin%03d-($bDraw%03d)-$bLose%03d op
-           |WHITE: me $wWin%03d-($wDraw%03d)-$wLose%03d op""".stripMargin
+        f"""WIN  : me $win%03d-($draw%03d)-$lose%03d op / $games%03d games
+           |BLACK: me $bWin%03d-($bDraw%03d)-$bLose%03d op / $bGames%03d games
+           |WHITE: me $wWin%03d-($wDraw%03d)-$wLose%03d op / $wGames%03d games""".stripMargin
+      )
+
+    def toLongString =
+      Ansi.fSky(
+        f"""--------------------------------------------------------------------------------
+           |WIN  : me $win%03d-($draw%03d)-$lose%03d op / $games%03d games
+           |BLACK: me $bWin%03d-($bDraw%03d)-$bLose%03d op / $bGames%03d games
+           |WHITE: me $wWin%03d-($wDraw%03d)-$wLose%03d op / $wGames%03d games
+           |
+           |ACKs: ${
+          ackSum.zip(ackCnt).map {
+            case (s, c) => if(c == 0) "-----" else f"${s / c}%05d"
+          }.mkString(" ")
+        }
+           |--------------------------------------------------------------------------------""".stripMargin
       )
   }
 
-  val initStats = Stats(0, 0, 0, 0, 0, 0)
+  def initStats =
+    Stats(0, 0, 0, 0, 0, 0, MutIndexedSeq.fill(61)(0), MutIndexedSeq.fill(61)(0))
 }

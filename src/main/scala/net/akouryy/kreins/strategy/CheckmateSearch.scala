@@ -2,7 +2,6 @@ package net.akouryy.kreins
 package strategy
 
 import game.{Board, LightBoard}
-//import net.akouryy.kreins.util.ConsoleUtil.Ansi
 import util.{BitUtil, ExtInt}
 
 import scala.collection.mutable

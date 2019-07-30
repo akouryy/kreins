@@ -1,7 +1,7 @@
 package net.akouryy.kreins
 package game
 
-import net.akouryy.kreins.util.ConsoleUtil.Ansi
+import util.ConsoleUtil.Ansi
 import util.BitUtil
 
 final class Board(

@@ -9,7 +9,7 @@ import game.Board
 import scorer.Scorer
 import strategy.{AlphaBetaSearch, CheckmateSearch, DyagsekiSearch}
 import util.ConsoleUtil.Ansi
-import util.InputUtil
+import util.{BitUtil, InputUtil}
 
 final class AlphaBetaPlayer(
   val scorer: Scorer,
@@ -39,6 +39,14 @@ final class AlphaBetaPlayer(
     }
 
     if(rest >= 30) for(m <- dysSearch.bestMove(board)) return m
+
+    val pp = board.possPlaceable.code
+    val ppc = BitUtil.popcount(pp)
+
+    if(ppc == 0) return -1
+    if(ppc == 1) {
+      return (0 to 63).find(i => (pp >> i & 1) == 1).get
+    }
 
     val searcher = new AlphaBetaSearch(scorer,
       if(time < 20000) 3
