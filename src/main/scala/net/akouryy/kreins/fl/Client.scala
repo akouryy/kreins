@@ -35,6 +35,8 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
     var state: GameState = Waiting
     var amIBlack = false
 
+    Kreins.gc1Sec()
+
     conn.connect { w =>
       w(Open(name).messageString)
     } { (s, w) =>

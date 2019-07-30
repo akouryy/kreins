@@ -32,6 +32,12 @@ final class AlphaBetaPlayer(
 
     val rest = board.countEmpty
 
+    if(rest == 0 && time >= 10000) {
+      reset()
+      Kreins.gc1Sec()
+      return -1
+    }
+
     if(rest >= 30) for(m <- dysSearch.bestMove(board)) return m
 
     val searcher = new AlphaBetaSearch(scorer,

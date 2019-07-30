@@ -117,4 +117,12 @@ object Kreins {
       )
     }
   }
+
+  def gc1Sec() = {
+    System.gc()
+    Thread.sleep(500)
+    System.gc()
+    Thread.sleep(500)
+    System.gc()
+  }
 }
