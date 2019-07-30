@@ -8,7 +8,7 @@ import util.InputUtil
 
 object Kreins {
 
-  val VERSION = "0.4.0"
+  val VERSION = "0.4.1"
 
   final case class CmdConfig(
     host: String = "localhost",
