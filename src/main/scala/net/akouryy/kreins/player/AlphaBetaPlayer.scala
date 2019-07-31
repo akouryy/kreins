@@ -42,7 +42,9 @@ final class AlphaBetaPlayer(
       } catch {
         case NegaScoutSearch.TimeoutError =>
           if(Kreins.isDebug) println(Ansi.bRed(s"NegaScout($depth, $dur) timeout"))
-          new NegaScoutSearch(scorer, 3).bestMove(board, -1)
+          new NegaScoutSearch(scorer,
+            if(depth == 8) 5 else 3
+          ).bestMove(board, -1)
       }
     }
   }
