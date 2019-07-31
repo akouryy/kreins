@@ -29,7 +29,8 @@ final class AlphaBetaPlayer(
     } else {
       val depth =
         if(timeMS < 50000 || rest >= 30) 7
-        else 8
+        else if(rest >= 40) 8
+        else 9
 
       val dur =
         if(timeMS < 50000 && rest >= 40) 1000L
@@ -43,7 +44,7 @@ final class AlphaBetaPlayer(
         case NegaScoutSearch.TimeoutError =>
           if(Kreins.isDebug) println(Ansi.bRed(s"NegaScout($depth, $dur) timeout"))
           new NegaScoutSearch(scorer,
-            if(depth == 8) 5 else 3
+            if(depth >= 8) 5 else 3
           ).bestMove(board, -1)
       }
     }
@@ -73,7 +74,7 @@ final class AlphaBetaPlayer(
     if(rest <= 25 || absolutelyWin) {
       val maxTimeMS =
         if(rest <= 19 || absolutelyWin) {
-          if(time < 10000) time / 5 else 2000
+          if(time < 10000) time / 5 else if(time < 25000) 2000 else 7500
         } else if(rest <= 21) { // 20 or 21!!!
           if(time < 10000) time / 5 else if(time < 18000) time - 8000 else 10000
         } else {

@@ -48,7 +48,7 @@ final class NegaScoutSearch(val scorer: Scorer, val depth: Int) {
       var alpha = alpha0
       var max = Int.MinValue
 
-      cs.sortBy(_.countSnd).foreach { c =>
+      cs.sortBy(_.possPlaceable.popcount).foreach { c =>
         if(isFirst) {
           val v = -bestScore(c, level + 1, -beta, -alpha)
           if(beta <= v) return v

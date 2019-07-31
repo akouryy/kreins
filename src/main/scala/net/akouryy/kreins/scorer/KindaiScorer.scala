@@ -44,6 +44,6 @@ final class KindaiScorer(val wbp: Int, val wcn: Int, val wfs: Int) extends Score
       else if((~s & 0x0080808080808000L | k) == 0) -1
       else 0
     }
-    (a + b + c + d) * (wfs * 3 - mountCellScore)
+    (a + b + c + d) * (wbp * 3 - mountCellScore)
   }
 }

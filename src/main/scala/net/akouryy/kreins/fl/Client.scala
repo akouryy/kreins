@@ -26,7 +26,7 @@ final class Client(host: String, port: Int, name: String, zysFile: String) {
 
     val player =
       new AlphaBetaPlayer(
-        new KindaiScorer(1, 20, 50),
+        new KindaiScorer(1, 200, 500),
         // depth = 6,
         zys
       )
